@@ -2,9 +2,10 @@
 
 import { useState, useMemo, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { supportPrompt, SupportPromptType } from '@/lib/prompt-core'
 
 export default function PromptPlayground() {
-  const [userText, setUserText] = useState<string>('Write a function to sort an array')
+  const [userText, setUserText] = useState<string>('Write a function to sort an array efficiently')
   const [error, setError] = useState<string>('')
   const [model, setModel] = useState<string>('')
   const [models, setModels] = useState<string[]>([])
@@ -54,6 +55,10 @@ export default function PromptPlayground() {
     ],
     []
   )
+
+  // Prompt type selection
+  const [promptType, setPromptType] = useState<SupportPromptType>('ENHANCE')
+  const promptTypes = supportPrompt.getAvailableTypes()
 
   useEffect(() => {
     // Fetch available models from the server and populate dropdown
@@ -107,7 +112,7 @@ export default function PromptPlayground() {
       const res = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ model: model || undefined, type: 'ENHANCE', params })
+        body: JSON.stringify({ model: model || undefined, type: promptType, params })
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Request failed')
@@ -167,8 +172,22 @@ export default function PromptPlayground() {
           </div>
         </div>
 
-        {/* Language and model selection */}
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+        {/* Language, model, and prompt type selection */}
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+          <div className="panel">
+            <label className="mb-2 block text-xs font-medium text-gray-600">Prompt type</label>
+            <select value={promptType} onChange={(e) => setPromptType(e.target.value as SupportPromptType)} className="w-full">
+              {promptTypes.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
+            <p className="mt-1 text-[11px] text-gray-500">
+              {supportPrompt.getDescription(promptType)}
+            </p>
+          </div>
+
           <div className="panel">
             <label className="mb-2 block text-xs font-medium text-gray-600">Programming language</label>
             <select value={language} onChange={(e) => setLanguage(e.target.value)} className="w-full">
