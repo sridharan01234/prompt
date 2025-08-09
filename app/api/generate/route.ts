@@ -1,18 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { supportPrompt } from 'prompt-core'
-import type { SupportPromptType } from 'prompt-core'
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { model = 'gpt-4o-mini', type, params } = body as {
+    const { model = 'gpt-4o-mini', params } = body as {
       model?: string
-      type: SupportPromptType
       params: Record<string, any>
     }
 
-    const prompt = supportPrompt.create(type, params)
+    const prompt = supportPrompt.create('ENHANCE', params)
 
     const apiKey = process.env.OPENAI_API_KEY || process.env.NEXT_PUBLIC_OPENAI_API_KEY
     if (!apiKey) {
