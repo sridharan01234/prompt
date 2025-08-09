@@ -5,45 +5,57 @@ import { MotionConfig, motion } from 'framer-motion'
 export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <MotionConfig reducedMotion="user">
-      {/* Animated background accents */}
-      <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-        <motion.div
-          className="absolute -left-20 -top-20 h-72 w-72 rounded-full bg-gradient-to-tr from-fuchsia-400/30 to-indigo-400/30 blur-3xl"
-          animate={{ x: [0, 20, -10, 0], y: [0, -10, 10, 0] }}
-          transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }}
-        />
-        <motion.div
-          className="absolute -bottom-24 -right-16 h-80 w-80 rounded-full bg-gradient-to-tr from-rose-300/30 to-violet-300/30 blur-3xl"
-          animate={{ x: [0, -15, 10, 0], y: [0, 15, -10, 0] }}
-          transition={{ duration: 24, repeat: Infinity, ease: 'easeInOut' }}
-        />
-      </div>
+      {/* Light, subtle background */}
+      <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 bg-gradient-to-b from-white to-slate-50" />
 
-      <div className="mx-auto max-w-7xl px-6 py-8">
+      {/* Top nav */}
+      <header className="sticky top-0 z-30 border-b border-slate-200/60 bg-white/90 backdrop-blur">
+        <div className="mx-auto max-w-6xl px-4">
+          <div className="flex h-14 items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-indigo-600 text-white">P</span>
+              <span className="text-sm font-semibold text-slate-900">Prompt Enhancer</span>
+              <span className="ml-2 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">Beta</span>
+            </div>
+            <nav className="flex items-center gap-4 text-xs">
+              <a href="/" className="text-slate-600 hover:text-slate-900">
+                Home
+              </a>
+              <a href="https://github.com/" target="_blank" rel="noreferrer" className="text-slate-600 hover:text-slate-900">
+                GitHub
+              </a>
+            </nav>
+          </div>
+        </div>
+      </header>
+
+      <div className="relative mx-auto max-w-6xl px-4 py-6">
         <motion.header
-          initial={{ opacity: 0, y: 12 }}
+          initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="mb-10 flex flex-col gap-3 md:flex-row md:items-end md:justify-between"
+          transition={{ duration: 0.35 }}
+          className="mb-6 text-center"
         >
-          <div>
-            <h1 className="text-3xl font-extrabold tracking-tight">
-              <span className="bg-gradient-to-r from-indigo-600 via-fuchsia-600 to-rose-600 bg-clip-text text-transparent">Prompt Enhancer</span>
-            </h1>
-            <p className="mt-1 text-sm text-gray-600">Create, enhance, and manage prompts. Powered by OpenAI.</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700">Next.js</span>
-            <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">Tailwind CSS</span>
-            <span className="rounded-full border border-pink-200 bg-pink-50 px-3 py-1 text-xs font-medium text-pink-700">Framer Motion</span>
-          </div>
+          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">Playground</h1>
+          <p className="mt-1 text-sm text-slate-600">Describe, refine, and run prompts in one place.</p>
         </motion.header>
 
-        <motion.main initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}>
+        {/* Fit main grid into viewport height */}
+        <motion.main
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.05 }}
+          className="fit-vh"
+        >
           {children}
         </motion.main>
 
-        <motion.footer initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3, duration: 0.5 }} className="mt-12 text-center text-xs text-gray-500">
+        <motion.footer
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2, duration: 0.35 }}
+          className="mt-6 text-center text-xs text-slate-500"
+        >
           Built with ❤️ for better prompts
         </motion.footer>
       </div>

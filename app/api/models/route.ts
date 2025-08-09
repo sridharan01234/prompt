@@ -1,36 +1,29 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { ALL_MODELS, LIMITED_MODELS, PREMIUM_MODELS } from '@/lib/models'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const apiKey = process.env.OPENAI_API_KEY || process.env.NEXT_PUBLIC_OPENAI_API_KEY
-    if (!apiKey) {
-      return NextResponse.json(
-        { error: 'OPENAI_API_KEY is missing. Create web/.env.local with OPENAI_API_KEY=your_key and restart dev server.' },
-        { status: 500 }
-      )
+    const session = await getServerSession(authOptions as any)
+    let isAuthed = Boolean(session)
+
+    // Check for our custom Google auth cookie if no NextAuth session
+    if (!isAuthed) {
+      const googleAuthCookie = request.cookies.get('google-auth-user')
+      isAuthed = Boolean(googleAuthCookie)
     }
 
-    const res = await fetch('https://api.openai.com/v1/models', {
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-      },
-      cache: 'no-store'
-    })
-
-    if (!res.ok) {
-      const text = await res.text()
-      return NextResponse.json({ error: text }, { status: res.status })
+    // Always return all models so free users can see premium choices in the UI
+    // Include metadata so the client can distinguish premium vs free and auth state
+    const payload = {
+      models: [...ALL_MODELS].sort(),
+      premium: [...PREMIUM_MODELS].sort(),
+      limited: [...LIMITED_MODELS].sort(),
+      authed: isAuthed
     }
 
-    const data = await res.json()
-    const models = Array.isArray(data.data)
-      ? data.data
-          .map((m: any) => m.id as string)
-          .filter((id: string) => typeof id === 'string')
-          .sort()
-      : []
-
-    return NextResponse.json({ models })
+    return NextResponse.json(payload)
   } catch (e) {
     return NextResponse.json({ error: (e as Error).message }, { status: 500 })
   }
