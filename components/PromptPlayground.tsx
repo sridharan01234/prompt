@@ -7,23 +7,44 @@ import { createPortal } from 'react-dom'
 import { useAuth } from './AuthProvider'
 import { GoogleSignInButton, GoogleOneTapSignIn } from './GoogleSignInButton'
 
-// Lightweight styled dropdown for models
-function ModelDropdown({
+// Enhanced reusable dropdown component with modern styling
+interface DropdownOption {
+  value: string
+  label: string
+  icon?: string
+  description?: string
+  disabled?: boolean
+  premium?: boolean
+}
+
+interface DropdownGroup {
+  label: string
+  options: DropdownOption[]
+  color?: 'green' | 'amber' | 'blue' | 'purple'
+}
+
+function ModernDropdown({
   value,
   onChange,
-  limited,
-  premium,
-  authed,
-  loading,
-  error
+  options = [],
+  groups = [],
+  placeholder = 'Select an option',
+  searchable = false,
+  loading = false,
+  error,
+  disabled = false,
+  className = ''
 }: {
   value: string
-  onChange: (v: string) => void
-  limited: string[]
-  premium: string[]
-  authed: boolean
-  loading: boolean
+  onChange: (value: string) => void
+  options?: DropdownOption[]
+  groups?: DropdownGroup[]
+  placeholder?: string
+  searchable?: boolean
+  loading?: boolean
   error?: string
+  disabled?: boolean
+  className?: string
 }) {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
@@ -66,32 +87,46 @@ function ModelDropdown({
     }
   }, [open])
 
-  const f = (list: string[]) =>
-    list.filter((m) => m.toLowerCase().includes(query.trim().toLowerCase()))
+  const filterOptions = (opts: DropdownOption[]) =>
+    opts.filter((opt) => opt.label.toLowerCase().includes(query.trim().toLowerCase()))
 
-  const isPremiumSelected = premium.includes(value)
+  const allOptions = [...options, ...groups.flatMap(g => g.options)]
+  const selectedOption = allOptions.find(opt => opt.value === value)
+  const selectedLabel = selectedOption?.label || placeholder
+
+  const groupColors = {
+    green: { bg: 'bg-green-600/20', text: 'text-green-300', border: 'border-green-400', section: 'text-green-400' },
+    amber: { bg: 'bg-amber-600/20', text: 'text-amber-300', border: 'border-amber-400', section: 'text-amber-400' },
+    blue: { bg: 'bg-blue-600/20', text: 'text-blue-300', border: 'border-blue-400', section: 'text-blue-400' },
+    purple: { bg: 'bg-purple-600/20', text: 'text-purple-300', border: 'border-purple-400', section: 'text-purple-400' }
+  }
 
   return (
-    <div className="relative" ref={containerRef}>
+    <div className={`relative ${className}`} ref={containerRef}>
       <button
         ref={buttonRef}
         type="button"
         aria-haspopup="listbox"
         aria-expanded={open}
+        disabled={disabled || loading}
         onClick={() => {
+          if (disabled || loading) return
           setOpen((v) => !v)
           setTimeout(updatePosition, 0)
         }}
         className={`group flex w-full items-center justify-between rounded-xl border bg-white/5 backdrop-blur-md px-4 py-3 text-sm shadow-lg transition-all duration-300 hover:bg-white/10 hover:border-blue-400/50 focus:outline-none focus:ring-2 focus:ring-blue-400/50 ${
-          !authed && isPremiumSelected ? 'border-amber-400/50 bg-amber-400/10' : 'border-white/10'
-        }`}
+          disabled || loading ? 'opacity-50 cursor-not-allowed' : 'border-white/10'
+        } ${selectedOption?.premium ? 'border-amber-400/50 bg-amber-400/10' : ''}`}
       >
         <span className="flex items-center gap-3">
-          {!authed && isPremiumSelected && (
+          {selectedOption?.icon && (
+            <span aria-hidden className="text-lg">{selectedOption.icon}</span>
+          )}
+          {selectedOption?.premium && (
             <span aria-hidden className="text-amber-400 group-hover:animate-pulse">🔒</span>
           )}
           <span className="truncate text-white font-medium">
-            {value || (loading ? 'Loading models...' : 'Select a model')}
+            {loading ? 'Loading...' : selectedLabel}
           </span>
         </span>
         <svg 
@@ -115,19 +150,21 @@ function ModelDropdown({
               className="z-50 overflow-hidden border border-white/20 bg-black/80 backdrop-blur-xl shadow-2xl rounded-xl"
               style={{ position: 'fixed', top: menuPos.top, left: menuPos.left, minWidth: menuPos.width }}
             >
-              <div className="p-4 border-b border-white/10 bg-white/5">
-                <input
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search models..."
-                  className="w-full border border-white/20 bg-white/10 backdrop-blur-md px-4 py-2 text-sm text-white placeholder-gray-400 rounded-lg focus:outline-none focus:border-blue-400/50 focus:ring-2 focus:ring-blue-400/20"
-                />
-              </div>
+              {searchable && (
+                <div className="p-4 border-b border-white/10 bg-white/5">
+                  <input
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Search options..."
+                    className="w-full border border-white/20 bg-white/10 backdrop-blur-md px-4 py-2 text-sm text-white placeholder-gray-400 rounded-lg focus:outline-none focus:border-blue-400/50 focus:ring-2 focus:ring-blue-400/20"
+                  />
+                </div>
+              )}
 
               {loading && (
                 <div className="p-4 text-sm text-gray-300 flex items-center gap-2">
                   <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-400 border-t-transparent"></div>
-                  Loading models...
+                  Loading...
                 </div>
               )}
               {!loading && error && (
@@ -138,25 +175,30 @@ function ModelDropdown({
 
               {!loading && !error && (
                 <div className="max-h-64 overflow-auto text-sm">
-                  <div className="sticky top-0 z-10 bg-black/90 backdrop-blur-md px-4 py-3 text-xs font-semibold uppercase tracking-wider text-green-400 border-b border-white/10">
-                    Free Models
-                  </div>
-                  {f(limited).map((m) => (
+                  {/* Render standalone options first */}
+                  {options.length > 0 && filterOptions(options).map((option) => (
                     <div
-                      key={m}
+                      key={option.value}
                       onClick={() => {
-                        onChange(m)
+                        if (option.disabled) return
+                        onChange(option.value)
                         setOpen(false)
                       }}
                       className={`cursor-pointer w-full px-4 py-3 text-left border-b border-white/5 last:border-b-0 transition-all duration-150 ${
-                        value === m 
+                        option.disabled ? 'opacity-50 cursor-not-allowed' : ''
+                      } ${
+                        value === option.value 
                           ? 'bg-blue-600/20 text-blue-300 border-l-4 border-blue-400' 
                           : 'text-gray-300 hover:bg-white/5 hover:text-white'
                       }`}
                     >
                       <div className="flex items-center justify-between">
-                        <span className="truncate font-medium">{m}</span>
-                        {value === m && (
+                        <span className="flex items-center gap-2">
+                          {option.icon && <span className="text-lg">{option.icon}</span>}
+                          {option.premium && <span className="text-amber-400 text-xs">🔒</span>}
+                          <span className="font-medium">{option.label}</span>
+                        </span>
+                        {value === option.value && (
                           <span className="text-blue-400 ml-2">
                             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                               <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -164,40 +206,61 @@ function ModelDropdown({
                           </span>
                         )}
                       </div>
+                      {option.description && (
+                        <div className="text-xs text-gray-400 mt-1">{option.description}</div>
+                      )}
                     </div>
                   ))}
 
-                  <div className="sticky top-0 z-10 bg-black/90 backdrop-blur-md px-4 py-3 text-xs font-semibold uppercase tracking-wider text-amber-400 border-b border-white/10">
-                    Premium Models
-                  </div>
-                  {f(premium).map((m) => (
-                    <div
-                      key={m}
-                      onClick={() => {
-                        onChange(m)
-                        setOpen(false)
-                      }}
-                      className={`cursor-pointer w-full px-4 py-3 text-left border-b border-white/5 last:border-b-0 transition-all duration-150 ${
-                        value === m 
-                          ? 'bg-purple-600/20 text-purple-300 border-l-4 border-purple-400' 
-                          : 'text-gray-300 hover:bg-white/5 hover:text-white'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="truncate flex items-center gap-2">
-                          {!authed && <span className="text-amber-400 text-xs">🔒</span>}
-                          <span className="font-medium">{m}</span>
-                        </span>
-                        {value === m && (
-                          <span className="text-purple-400 ml-2">
-                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                            </svg>
-                          </span>
-                        )}
+                  {/* Render grouped options */}
+                  {groups.map((group) => {
+                    const filteredOptions = filterOptions(group.options)
+                    if (filteredOptions.length === 0) return null
+                    const colors = groupColors[group.color || 'blue']
+                    
+                    return (
+                      <div key={group.label}>
+                        <div className={`sticky top-0 z-10 bg-black/90 backdrop-blur-md px-4 py-3 text-xs font-semibold uppercase tracking-wider ${colors.section} border-b border-white/10`}>
+                          {group.label}
+                        </div>
+                        {filteredOptions.map((option) => (
+                          <div
+                            key={option.value}
+                            onClick={() => {
+                              if (option.disabled) return
+                              onChange(option.value)
+                              setOpen(false)
+                            }}
+                            className={`cursor-pointer w-full px-4 py-3 text-left border-b border-white/5 last:border-b-0 transition-all duration-150 ${
+                              option.disabled ? 'opacity-50 cursor-not-allowed' : ''
+                            } ${
+                              value === option.value 
+                                ? `${colors.bg} ${colors.text} border-l-4 ${colors.border}` 
+                                : 'text-gray-300 hover:bg-white/5 hover:text-white'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="flex items-center gap-2">
+                                {option.icon && <span className="text-lg">{option.icon}</span>}
+                                {option.premium && <span className="text-amber-400 text-xs">🔒</span>}
+                                <span className="font-medium">{option.label}</span>
+                              </span>
+                              {value === option.value && (
+                                <span className={`${colors.text} ml-2`}>
+                                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                  </svg>
+                                </span>
+                              )}
+                            </div>
+                            {option.description && (
+                              <div className="text-xs text-gray-400 mt-1">{option.description}</div>
+                            )}
+                          </div>
+                        ))}
                       </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               )}
             </motion.div>
@@ -205,6 +268,55 @@ function ModelDropdown({
           document.body
         )}
     </div>
+  )
+}
+
+// Legacy ModelDropdown wrapper for backward compatibility
+function ModelDropdown({
+  value,
+  onChange,
+  limited,
+  premium,
+  authed,
+  loading,
+  error
+}: {
+  value: string
+  onChange: (v: string) => void
+  limited: string[]
+  premium: string[]
+  authed: boolean
+  loading: boolean
+  error?: string
+}) {
+  const groups: DropdownGroup[] = [
+    {
+      label: 'Free Models',
+      color: 'green',
+      options: limited.map(model => ({ value: model, label: model }))
+    },
+    {
+      label: 'Premium Models',
+      color: 'amber',
+      options: premium.map(model => ({ 
+        value: model, 
+        label: model, 
+        premium: !authed,
+        disabled: false
+      }))
+    }
+  ]
+
+  return (
+    <ModernDropdown
+      value={value}
+      onChange={onChange}
+      groups={groups}
+      placeholder={loading ? 'Loading models...' : 'Select a model'}
+      searchable={true}
+      loading={loading}
+      error={error}
+    />
   )
 }
 
@@ -435,32 +547,32 @@ export default function PromptPlayground() {
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3 mb-6">
             <div className="panel group hover:bg-white/8 transition-all duration-300">
               <label className="mb-2 block text-sm font-semibold text-gray-200">Prompt type</label>
-              <select 
-                value={promptType} 
-                onChange={(e) => setPromptType(e.target.value as SupportPromptType)} 
-                className="w-full bg-white/5 border border-white/20 rounded-lg px-3 py-2 text-white focus:border-blue-400/50 transition-all duration-200"
-              >
-                {promptTypes.map((type) => (
-                  <option key={type} value={type} className="bg-gray-800 text-white">
-                    {type}
-                  </option>
-                ))}
-              </select>
+              <ModernDropdown
+                value={promptType}
+                onChange={(value) => setPromptType(value as SupportPromptType)}
+                options={promptTypes.map(type => ({ 
+                  value: type, 
+                  label: type,
+                  icon: type === 'ENHANCE' ? '✨' : type === 'CODING' ? '💻' : type === 'TRANSLATE' ? '🌐' : '📝'
+                }))}
+                placeholder="Select prompt type"
+              />
             </div>
 
             <div className="panel group hover:bg-white/8 transition-all duration-300">
               <label className="mb-2 block text-sm font-semibold text-gray-200">Language</label>
-              <select 
-                value={language} 
-                onChange={(e) => setLanguage(e.target.value)} 
-                className="w-full bg-white/5 border border-white/20 rounded-lg px-3 py-2 text-white focus:border-blue-400/50 transition-all duration-200"
-              >
-                {languageOptions.map((lang) => (
-                  <option key={lang} value={lang} className="bg-gray-800 text-white">
-                    {lang}
-                  </option>
-                ))}
-              </select>
+              <ModernDropdown
+                value={language}
+                onChange={setLanguage}
+                options={languageOptions.map(lang => ({
+                  value: lang,
+                  label: lang,
+                  icon: lang === 'TypeScript' ? '🔷' : lang === 'JavaScript' ? '💛' : lang === 'Python' ? '🐍' : 
+                        lang === 'Java' ? '☕' : lang === 'Go' ? '🔵' : lang === 'Rust' ? '🦀' : '📄'
+                }))}
+                placeholder="Select language"
+                searchable={true}
+              />
             </div>
 
             <div className="panel group hover:bg-white/8 transition-all duration-300">
