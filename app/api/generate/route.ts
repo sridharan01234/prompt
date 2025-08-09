@@ -99,8 +99,6 @@ export async function POST(req: NextRequest) {
                 { role: 'user', content: prompt }
               ],
               stream: true, // Enable streaming
-              temperature: 0.7,
-              max_tokens: 4000
             })
 
             // Stream each chunk as it arrives
