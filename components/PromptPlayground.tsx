@@ -82,15 +82,24 @@ function ModelDropdown({
           setOpen((v) => !v)
           setTimeout(updatePosition, 0)
         }}
-        className={`flex w-full items-center justify-between rounded-md border bg-white px-3 py-2 text-sm shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-          !authed && isPremiumSelected ? 'border-amber-400' : 'border-slate-300'
+        className={`group flex w-full items-center justify-between rounded-xl border bg-white/5 backdrop-blur-md px-4 py-3 text-sm shadow-lg transition-all duration-300 hover:bg-white/10 hover:border-blue-400/50 focus:outline-none focus:ring-2 focus:ring-blue-400/50 ${
+          !authed && isPremiumSelected ? 'border-amber-400/50 bg-amber-400/10' : 'border-white/10'
         }`}
       >
-        <span className="flex items-center gap-2">
-          {!authed && isPremiumSelected && <span aria-hidden className="text-amber-500">🔒</span>}
-          <span className="truncate text-slate-900">{value || (loading ? 'Loading…' : 'Select a model')}</span>
+        <span className="flex items-center gap-3">
+          {!authed && isPremiumSelected && (
+            <span aria-hidden className="text-amber-400 group-hover:animate-pulse">🔒</span>
+          )}
+          <span className="truncate text-white font-medium">
+            {value || (loading ? 'Loading models...' : 'Select a model')}
+          </span>
         </span>
-        <svg className="h-4 w-4 text-slate-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+        <svg 
+          className={`h-5 w-5 text-gray-400 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} 
+          viewBox="0 0 20 20" 
+          fill="currentColor" 
+          aria-hidden
+        >
           <path d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.25 8.29a.75.75 0 01-.02-1.08z" />
         </svg>
       </button>
@@ -99,28 +108,39 @@ function ModelDropdown({
         createPortal(
           <AnimatePresence>
             <motion.div
-              initial={{ opacity: 0, y: -4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.15 }}
-              className="z-50 overflow-hidden border border-gray-200 bg-white shadow-lg"
+              initial={{ opacity: 0, y: -8, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -8, scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+              className="z-50 overflow-hidden border border-white/20 bg-black/80 backdrop-blur-xl shadow-2xl rounded-xl"
               style={{ position: 'fixed', top: menuPos.top, left: menuPos.left, minWidth: menuPos.width }}
             >
-              <div className="p-3 border-b border-gray-200 bg-white">
+              <div className="p-4 border-b border-white/10 bg-white/5">
                 <input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search models…"
-                  className="w-full border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-gray-500"
+                  placeholder="Search models..."
+                  className="w-full border border-white/20 bg-white/10 backdrop-blur-md px-4 py-2 text-sm text-white placeholder-gray-400 rounded-lg focus:outline-none focus:border-blue-400/50 focus:ring-2 focus:ring-blue-400/20"
                 />
               </div>
 
-              {loading && <div className="p-4 text-xs text-gray-500">Loading models…</div>}
-              {!loading && error && <div className="p-4 text-xs text-red-600">{error}</div>}
+              {loading && (
+                <div className="p-4 text-sm text-gray-300 flex items-center gap-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-400 border-t-transparent"></div>
+                  Loading models...
+                </div>
+              )}
+              {!loading && error && (
+                <div className="p-4 text-sm text-red-400 bg-red-500/10 border-l-4 border-red-500">
+                  {error}
+                </div>
+              )}
 
               {!loading && !error && (
                 <div className="max-h-64 overflow-auto text-sm">
-                  <div className="sticky top-0 z-10 bg-white px-4 py-2 text-[11px] font-medium uppercase tracking-wide text-gray-500 border-b border-gray-200">Free</div>
+                  <div className="sticky top-0 z-10 bg-black/90 backdrop-blur-md px-4 py-3 text-xs font-semibold uppercase tracking-wider text-green-400 border-b border-white/10">
+                    Free Models
+                  </div>
                   {f(limited).map((m) => (
                     <div
                       key={m}
@@ -128,20 +148,28 @@ function ModelDropdown({
                         onChange(m)
                         setOpen(false)
                       }}
-                      className={`cursor-pointer w-full px-4 py-2.5 text-left border-b border-gray-100 last:border-b-0 ${
+                      className={`cursor-pointer w-full px-4 py-3 text-left border-b border-white/5 last:border-b-0 transition-all duration-150 ${
                         value === m 
-                          ? 'bg-gray-200 text-gray-900 font-medium' 
-                          : 'text-gray-900 hover:bg-gray-50'
+                          ? 'bg-blue-600/20 text-blue-300 border-l-4 border-blue-400' 
+                          : 'text-gray-300 hover:bg-white/5 hover:text-white'
                       }`}
                     >
                       <div className="flex items-center justify-between">
-                        <span className="truncate">{m}</span>
-                        {value === m && <span className="text-gray-600 ml-2">✓</span>}
+                        <span className="truncate font-medium">{m}</span>
+                        {value === m && (
+                          <span className="text-blue-400 ml-2">
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          </span>
+                        )}
                       </div>
                     </div>
                   ))}
 
-                  <div className="sticky top-0 z-10 bg-white px-4 py-2 text-[11px] font-medium uppercase tracking-wide text-gray-500 border-b border-gray-200">Premium</div>
+                  <div className="sticky top-0 z-10 bg-black/90 backdrop-blur-md px-4 py-3 text-xs font-semibold uppercase tracking-wider text-amber-400 border-b border-white/10">
+                    Premium Models
+                  </div>
                   {f(premium).map((m) => (
                     <div
                       key={m}
@@ -149,15 +177,24 @@ function ModelDropdown({
                         onChange(m)
                         setOpen(false)
                       }}
-                      className={`cursor-pointer w-full px-4 py-2.5 text-left border-b border-gray-100 last:border-b-0 ${
+                      className={`cursor-pointer w-full px-4 py-3 text-left border-b border-white/5 last:border-b-0 transition-all duration-150 ${
                         value === m 
-                          ? 'bg-gray-200 text-gray-900 font-medium' 
-                          : 'text-gray-900 hover:bg-gray-50'
+                          ? 'bg-purple-600/20 text-purple-300 border-l-4 border-purple-400' 
+                          : 'text-gray-300 hover:bg-white/5 hover:text-white'
                       }`}
                     >
                       <div className="flex items-center justify-between">
-                        <span className="truncate">{!authed ? <span className="mr-2 text-orange-500">🔒</span> : null}{m}</span>
-                        {value === m && <span className="text-gray-600 ml-2">✓</span>}
+                        <span className="truncate flex items-center gap-2">
+                          {!authed && <span className="text-amber-400 text-xs">🔒</span>}
+                          <span className="font-medium">{m}</span>
+                        </span>
+                        {value === m && (
+                          <span className="text-purple-400 ml-2">
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          </span>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -313,156 +350,292 @@ export default function PromptPlayground() {
   return (
     <>
       <GoogleOneTapSignIn />
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      
+      {/* Floating notification for copy action */}
       <AnimatePresence>
         {copied && (
           <motion.div
-            initial={{ y: -8, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: -8, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed right-4 top-4 z-50 rounded-md border border-indigo-200 bg-white px-3 py-1.5 text-xs text-indigo-700 shadow"
+            initial={{ y: -50, opacity: 0, scale: 0.9 }}
+            animate={{ y: 0, opacity: 1, scale: 1 }}
+            exit={{ y: -50, opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.3, type: "spring" }}
+            className="fixed right-6 top-6 z-50 rounded-xl border border-green-400/30 bg-green-500/10 backdrop-blur-xl px-4 py-3 text-sm text-green-300 shadow-2xl"
           >
-            Copied to clipboard
+            <div className="flex items-center gap-2">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
+              Copied to clipboard!
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Left column */}
-      <section className="card space-y-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-base font-semibold text-slate-900">Playground</h2>
-            <p className="text-xs text-slate-600">Describe your task, get refined prompt</p>
-          </div>
-          <div className="flex items-center gap-2">
-            {isAuthenticated ? (
-              <>
-                <span className="badge">{user?.name || user?.email}</span>
-                <button 
-                  onClick={signOut}
-                  className="text-xs text-indigo-700 hover:underline"
-                >
-                  Sign out
-                </button>
-              </>
-            ) : (
-              <>
-                <GoogleSignInButton 
-                  text="signin_with"
-                  size="medium"
-                  className="mr-2"
-                />
-                <span className="text-xs text-slate-600">for premium models</span>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Selections */}
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-          <div className="panel">
-            <label className="mb-1 block text-xs font-medium text-slate-700">Prompt type</label>
-            <select value={promptType} onChange={(e) => setPromptType(e.target.value as SupportPromptType)} className="w-full">
-              {promptTypes.map((type) => (
-                <option key={type} value={type}>
-                  {type}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="panel">
-            <label className="mb-1 block text-xs font-medium text-slate-700">Language</label>
-            <select value={language} onChange={(e) => setLanguage(e.target.value)} className="w-full">
-              {languageOptions.map((lang) => (
-                <option key={lang} value={lang}>
-                  {lang}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="panel">
-            <div className="mb-1 flex items-center justify-between">
-              <label className="text-xs font-medium text-slate-700">OpenAI model</label>
-              <span className="kbd">Ctrl/⌘ K</span>
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+        {/* Left column - Input */}
+        <motion.section 
+          className="card group hover:scale-[1.02] transition-transform duration-300"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5 }}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
+          style={{
+            transform: `perspective(1000px) rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg)`,
+          }}
+        >
+          {/* Card header */}
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-white">Playground</h2>
+                <p className="text-sm text-gray-300">Describe your task, get refined prompts</p>
+              </div>
             </div>
-            <ModelDropdown
-              value={model}
-              onChange={setModel}
-              limited={limitedModels}
-              premium={premiumModels}
-              authed={isAuthenticated}
-              loading={modelsLoading}
-              error={modelsError}
+            
+            {/* User authentication section */}
+            <div className="flex items-center gap-3">
+              {isAuthenticated ? (
+                <motion.div 
+                  className="flex items-center gap-3"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="badge badge-green flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
+                    {user?.name || user?.email}
+                  </div>
+                  <button 
+                    onClick={signOut}
+                    className="text-sm text-red-400 hover:text-red-300 transition-colors duration-200 hover:underline"
+                  >
+                    Sign out
+                  </button>
+                </motion.div>
+              ) : (
+                <div className="flex items-center gap-3">
+                  <GoogleSignInButton 
+                    text="signin_with"
+                    size="medium"
+                    className="transform hover:scale-105 transition-transform duration-200"
+                  />
+                  <span className="text-xs text-gray-400">for premium models</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Control selections */}
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3 mb-6">
+            <div className="panel group hover:bg-white/8 transition-all duration-300">
+              <label className="mb-2 block text-sm font-semibold text-gray-200">Prompt type</label>
+              <select 
+                value={promptType} 
+                onChange={(e) => setPromptType(e.target.value as SupportPromptType)} 
+                className="w-full bg-white/5 border border-white/20 rounded-lg px-3 py-2 text-white focus:border-blue-400/50 transition-all duration-200"
+              >
+                {promptTypes.map((type) => (
+                  <option key={type} value={type} className="bg-gray-800 text-white">
+                    {type}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="panel group hover:bg-white/8 transition-all duration-300">
+              <label className="mb-2 block text-sm font-semibold text-gray-200">Language</label>
+              <select 
+                value={language} 
+                onChange={(e) => setLanguage(e.target.value)} 
+                className="w-full bg-white/5 border border-white/20 rounded-lg px-3 py-2 text-white focus:border-blue-400/50 transition-all duration-200"
+              >
+                {languageOptions.map((lang) => (
+                  <option key={lang} value={lang} className="bg-gray-800 text-white">
+                    {lang}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="panel group hover:bg-white/8 transition-all duration-300">
+              <div className="mb-2 flex items-center justify-between">
+                <label className="text-sm font-semibold text-gray-200">OpenAI model</label>
+                <span className="kbd">⌘K</span>
+              </div>
+              <ModelDropdown
+                value={model}
+                onChange={setModel}
+                limited={limitedModels}
+                premium={premiumModels}
+                authed={isAuthenticated}
+                loading={modelsLoading}
+                error={modelsError}
+              />
+              {!isAuthenticated && premiumModels.includes(model) && (
+                <motion.p 
+                  className="mt-2 text-xs text-amber-300 bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  🔒 Premium model selected. Sign in to use it, or pick a free model.
+                </motion.p>
+              )}
+            </div>
+          </div>
+
+          {/* Input area */}
+          <div className="panel group hover:bg-white/8 transition-all duration-300">
+            <div className="mb-3 flex items-center justify-between">
+              <label className="text-sm font-semibold text-gray-200 flex items-center gap-2">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Your input
+              </label>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-400">{charCount} chars</span>
+                <div className={`w-2 h-2 rounded-full ${charCount > 0 ? 'bg-green-400' : 'bg-gray-500'} transition-colors duration-200`}></div>
+              </div>
+            </div>
+            <textarea
+              ref={inputRef}
+              rows={10}
+              value={userText}
+              onChange={(e) => setUserText(e.target.value)}
+              className="font-mono text-sm bg-black/30 border border-white/20 rounded-xl p-4 text-white placeholder-gray-400 focus:border-blue-400/50 focus:bg-black/40 transition-all duration-200 resize-none"
+              placeholder="Describe what you need... For example: 'Write a function to sort an array efficiently' or 'Create a marketing email for a new product launch'"
             />
-            {!isAuthenticated && premiumModels.includes(model) && (
-              <p className="mt-1 text-[11px] text-amber-700">
-                Premium model selected. Sign in to use it, or pick a free model.
+            {error && (
+              <motion.p 
+                className="mt-3 text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                ⚠️ {error}
+              </motion.p>
+            )}
+            {!isAuthenticated && (
+              <p className="mt-3 text-xs text-blue-300 bg-blue-500/10 border border-blue-500/20 rounded-lg px-3 py-2">
+                💡 Free tier: 2.5M tokens/day across limited models. Sign in to unlock premium models (250k/day).
               </p>
             )}
           </div>
-        </div>
 
-        {/* Input */}
-        <div className="panel">
-          <div className="mb-1 flex items-center justify-between">
-            <label className="text-xs font-medium text-slate-700">Your input</label>
-            <span className="text-[11px] text-slate-500">{charCount} chars</span>
+          {/* Action buttons */}
+          <div className="flex flex-wrap gap-3 mt-6">
+            <motion.button 
+              onClick={onAskOpenAI} 
+              disabled={loading || modelsLoading || !model}
+              className="btn-primary flex-1 min-w-[200px] flex items-center justify-center gap-2 relative overflow-hidden"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ duration: 0.2 }}
+            >
+              {loading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  Generate with AI
+                </>
+              )}
+            </motion.button>
+            <motion.button 
+              onClick={() => setUserText('')} 
+              className="btn-secondary flex items-center gap-2"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ duration: 0.2 }}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Reset
+            </motion.button>
           </div>
-          <textarea
-            ref={inputRef}
-            rows={9}
-            value={userText}
-            onChange={(e) => setUserText(e.target.value)}
-            className="font-mono"
-            placeholder="Describe what you need…"
-          />
-          {error && <p className="mt-2 text-xs text-red-600">{error}</p>}
-          {!isAuthenticated && (
-            <p className="mt-2 text-[11px] text-slate-500">
-              Free tier: 2.5M tokens/day across limited models. Sign in to unlock premium models (250k/day).
-            </p>
+        </motion.section>
+
+        {/* Right column - Output */}
+        <motion.section 
+          className="card group hover:scale-[1.02] transition-transform duration-300"
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+        >
+          {/* Output header */}
+          <div className="mb-6 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-green-500 to-blue-600 flex items-center justify-center shadow-lg">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-white">AI Response</h3>
+                <p className="text-sm text-gray-300">Enhanced result from the selected model</p>
+              </div>
+            </div>
+            <motion.button 
+              onClick={() => onCopy(aiOutput)} 
+              disabled={!aiOutput} 
+              className="btn-success flex items-center gap-2"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              {copied ? 'Copied!' : 'Copy'}
+            </motion.button>
+          </div>
+
+          {/* Output content */}
+          {loading ? (
+            <div className="space-y-3 rounded-xl border border-white/10 bg-black/20 backdrop-blur-md p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-400 border-t-transparent"></div>
+                <span className="text-gray-300">AI is thinking...</span>
+              </div>
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="shimmer h-4 rounded bg-white/5" style={{ width: `${Math.random() * 40 + 60}%` }} />
+              ))}
+            </div>
+          ) : (
+            <div className="relative">
+              <pre className="max-h-[500px] overflow-auto whitespace-pre-wrap break-words rounded-xl border border-white/10 bg-black/20 backdrop-blur-md p-6 text-sm text-gray-100 font-mono leading-relaxed shadow-inner">
+                {aiOutput || (
+                  <div className="text-center py-12 text-gray-400">
+                    <svg className="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                    <p className="text-lg font-medium mb-2">Ready for AI magic!</p>
+                    <p className="text-sm">Your enhanced prompt will appear here...</p>
+                  </div>
+                )}
+              </pre>
+              {aiOutput && (
+                <div className="absolute top-2 right-2">
+                  <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
+                </div>
+              )}
+            </div>
           )}
-        </div>
-
-        {/* Actions */}
-        <div className="flex flex-wrap gap-2">
-          <button onClick={onAskOpenAI} disabled={loading || modelsLoading || !model}>
-            {loading ? 'Generating…' : 'Generate with AI'}
-          </button>
-          <button onClick={() => setUserText('')} className="bg-gray-600 hover:bg-gray-700">
-            Reset
-          </button>
-        </div>
-      </section>
-
-      {/* Right column */}
-      <section className="card">
-        <div className="mb-2 flex items-center justify-between">
-          <div>
-            <label className="text-sm font-medium text-slate-900">OpenAI Response</label>
-            <p className="text-xs text-slate-600">Result from the selected model</p>
-          </div>
-          <button onClick={() => onCopy(aiOutput)} disabled={!aiOutput} className="bg-indigo-600 hover:bg-indigo-700">
-            {copied ? 'Copied' : 'Copy'}
-          </button>
-        </div>
-        {loading ? (
-          <div className="space-y-2 rounded-lg border border-slate-200 bg-white p-3">
-            <div className="h-4 w-3/4 animate-pulse rounded bg-slate-200" />
-            <div className="h-4 w-5/6 animate-pulse rounded bg-slate-200" />
-            <div className="h-4 w-4/6 animate-pulse rounded bg-slate-200" />
-            <div className="h-4 w-2/3 animate-pulse rounded bg-slate-200" />
-          </div>
-        ) : (
-          <pre className="max-h-[420px] overflow-auto whitespace-pre-wrap break-words rounded-lg border border-slate-200 bg-white p-3 text-sm text-slate-900">
-            {aiOutput || 'OpenAI response will appear here...'}
-          </pre>
-        )}
-      </section>
-    </div>
+        </motion.section>
+      </div>
     </>
   )
 }

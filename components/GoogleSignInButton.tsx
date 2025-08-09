@@ -24,13 +24,27 @@ export function GoogleSignInButton({
       return
     }
 
+    // Clear any existing content
+    buttonRef.current.innerHTML = ''
+
     window.google.accounts.id.renderButton(buttonRef.current, {
       text,
       size,
       width,
-      theme: 'outline',
+      theme: 'filled_black',
       type: 'standard',
+      shape: 'rectangular',
+      logo_alignment: 'left',
     })
+
+    // Apply custom styling to the Google button
+    const iframe = buttonRef.current.querySelector('iframe')
+    if (iframe) {
+      iframe.style.borderRadius = '12px'
+      iframe.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.25)'
+      iframe.style.border = '1px solid rgba(255, 255, 255, 0.1)'
+      iframe.style.transition = 'all 0.3s ease'
+    }
   }, [text, size, width, isAuthenticated])
 
   if (isAuthenticated) {
@@ -38,8 +52,13 @@ export function GoogleSignInButton({
   }
 
   return (
-    <div className={className}>
-      <div ref={buttonRef}></div>
+    <div className={`relative group ${className}`}>
+      {/* Custom wrapper with modern styling */}
+      <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-xl blur-sm group-hover:blur-md transition-all duration-300"></div>
+      <div 
+        ref={buttonRef}
+        className="relative rounded-xl overflow-hidden backdrop-blur-sm border border-white/10 hover:border-white/20 transition-all duration-300 hover:scale-105"
+      ></div>
     </div>
   )
 }
@@ -61,7 +80,7 @@ export function GoogleOneTapSignIn() {
           }
         })
       }
-    }, 1000)
+    }, 1500) // Increased delay for better UX
 
     return () => clearTimeout(timer)
   }, [isAuthenticated, isLoading])

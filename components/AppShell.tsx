@@ -5,46 +5,109 @@ import { MotionConfig, motion } from 'framer-motion'
 export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <MotionConfig reducedMotion="user">
-      {/* Light, subtle background */}
-      <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 bg-gradient-to-b from-white to-slate-50" />
+      {/* Dynamic gradient background with floating particles */}
+      <div aria-hidden className="pointer-events-none fixed inset-0 -z-10">
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(99,102,241,0.1),transparent_70%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(139,92,246,0.15),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(59,130,246,0.1),transparent_50%)]" />
+        
+        {/* Floating particles */}
+        <div className="particle absolute w-1 h-1 bg-blue-400 rounded-full opacity-20" style={{top: '10%', left: '20%', animationDelay: '0s'}}></div>
+        <div className="particle absolute w-2 h-2 bg-purple-400 rounded-full opacity-20" style={{top: '60%', left: '80%', animationDelay: '-5s'}}></div>
+        <div className="particle absolute w-1.5 h-1.5 bg-indigo-400 rounded-full opacity-20" style={{top: '30%', left: '70%', animationDelay: '-10s'}}></div>
+        <div className="particle absolute w-1 h-1 bg-cyan-400 rounded-full opacity-20" style={{top: '80%', left: '10%', animationDelay: '-7s'}}></div>
+        <div className="particle absolute w-1.5 h-1.5 bg-pink-400 rounded-full opacity-20" style={{top: '20%', left: '60%', animationDelay: '-3s'}}></div>
+      </div>
 
-      {/* Top nav */}
-      <header className="sticky top-0 z-30 border-b border-slate-200/60 bg-white/90 backdrop-blur">
-        <div className="mx-auto max-w-6xl px-4">
-          <div className="flex h-14 items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-indigo-600 text-white">P</span>
-              <span className="text-sm font-semibold text-slate-900">Prompt Enhancer</span>
-              <span className="ml-2 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">Beta</span>
-            </div>
-            <nav className="flex items-center gap-4 text-xs">
-              <a href="/" className="text-slate-600 hover:text-slate-900">
+      {/* Enhanced top navigation */}
+      <header className="sticky top-0 z-30 border-b border-white/10 bg-black/20 backdrop-blur-xl">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="flex h-16 items-center justify-between">
+            <motion.div 
+              className="flex items-center gap-3"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl blur-sm opacity-75"></div>
+                <span className="relative inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold text-lg shadow-lg">
+                  P
+                </span>
+              </div>
+              <div>
+                <span className="text-lg font-bold text-white">Prompt Enhancer</span>
+                <span className="ml-3 rounded-full bg-purple-600/20 px-3 py-1 text-xs font-medium text-purple-300 border border-purple-500/30">
+                  Beta
+                </span>
+              </div>
+            </motion.div>
+            
+            <motion.nav 
+              className="flex items-center gap-6 text-sm"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+            >
+              <a href="/" className="text-gray-300 hover:text-white transition-colors duration-200 hover:underline decoration-blue-400">
                 Home
               </a>
-              <a href="https://github.com/" target="_blank" rel="noreferrer" className="text-slate-600 hover:text-slate-900">
+              <a 
+                href="https://github.com/" 
+                target="_blank" 
+                rel="noreferrer" 
+                className="text-gray-300 hover:text-white transition-all duration-200 hover:underline decoration-purple-400 flex items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                </svg>
                 GitHub
               </a>
-            </nav>
+            </motion.nav>
           </div>
         </div>
       </header>
 
-      <div className="relative mx-auto max-w-6xl px-4 py-6">
+      <div className="relative mx-auto max-w-7xl px-6 py-8">
         <motion.header
-          initial={{ opacity: 0, y: 8 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35 }}
-          className="mb-6 text-center"
+          transition={{ duration: 0.6 }}
+          className="mb-8 text-center"
         >
-          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">Playground</h1>
-          <p className="mt-1 text-sm text-slate-600">Describe, refine, and run prompts in one place.</p>
+          <div className="relative">
+            <h1 className="text-5xl font-extrabold tracking-tight bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent mb-4">
+              Playground
+            </h1>
+            <div className="absolute -inset-1 bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-pink-600/20 blur-3xl -z-10"></div>
+          </div>
+          <p className="text-lg text-gray-300 max-w-2xl mx-auto leading-relaxed">
+            Create, refine, and perfect your prompts with AI assistance. Transform your ideas into powerful, effective prompts.
+          </p>
+          
+          {/* Feature highlights */}
+          <div className="flex justify-center gap-6 mt-6">
+            <div className="flex items-center gap-2 text-sm text-gray-400">
+              <div className="w-2 h-2 rounded-full bg-green-400"></div>
+              AI-Powered Enhancement
+            </div>
+            <div className="flex items-center gap-2 text-sm text-gray-400">
+              <div className="w-2 h-2 rounded-full bg-blue-400"></div>
+              Real-time Preview
+            </div>
+            <div className="flex items-center gap-2 text-sm text-gray-400">
+              <div className="w-2 h-2 rounded-full bg-purple-400"></div>
+              Multiple Models
+            </div>
+          </div>
         </motion.header>
 
-        {/* Fit main grid into viewport height */}
+        {/* Enhanced main content area */}
         <motion.main
-          initial={{ opacity: 0, y: 8 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35, delay: 0.05 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
           className="fit-vh"
         >
           {children}
@@ -53,10 +116,14 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         <motion.footer
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.2, duration: 0.35 }}
-          className="mt-6 text-center text-xs text-slate-500"
+          transition={{ delay: 0.3, duration: 0.5 }}
+          className="mt-12 text-center"
         >
-          Built with ❤️ for better prompts
+          <div className="inline-flex items-center gap-2 text-sm text-gray-400 bg-white/5 backdrop-blur-sm rounded-full px-6 py-3 border border-white/10">
+            <span>Built with</span>
+            <span className="text-red-400 animate-pulse">❤️</span>
+            <span>for better prompts</span>
+          </div>
         </motion.footer>
       </div>
     </MotionConfig>
