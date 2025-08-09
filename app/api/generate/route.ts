@@ -73,17 +73,89 @@ export async function POST(req: NextRequest) {
       TEST: 'You are a testing expert specializing in comprehensive test strategies and quality assurance.'
     }
 
-    const completion = await client.chat.completions.create({
-      model,
-      messages: [
-        { role: 'system', content: systemPrompts[type] },
-        { role: 'user', content: prompt }
-      ]
-    })
+    // Check if client requests streaming via header or query param
+    const isStreamingRequested = req.headers.get('accept') === 'text/stream' || 
+                                req.nextUrl.searchParams.get('stream') === 'true'
 
-    const content = completion.choices[0]?.message?.content || ''
+    if (isStreamingRequested) {
+      // Create streaming response
+      const stream = new ReadableStream({
+        async start(controller) {
+          try {
+            // Send initial metadata
+            const encoder = new TextEncoder()
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ 
+              type: 'metadata', 
+              prompt, 
+              model, 
+              promptType: type 
+            })}\n\n`))
 
-    return NextResponse.json({ prompt, output: content, type })
+            // Create streaming completion
+            const completion = await client.chat.completions.create({
+              model,
+              messages: [
+                { role: 'system', content: systemPrompts[type] },
+                { role: 'user', content: prompt }
+              ],
+              stream: true, // Enable streaming
+              temperature: 0.7,
+              max_tokens: 4000
+            })
+
+            // Stream each chunk as it arrives
+            for await (const chunk of completion) {
+              const content = chunk.choices[0]?.delta?.content
+              if (content) {
+                // Send content chunk in Server-Sent Events format
+                controller.enqueue(encoder.encode(`data: ${JSON.stringify({ 
+                  type: 'content', 
+                  content 
+                })}\n\n`))
+              }
+            }
+
+            // Send completion signal
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ 
+              type: 'complete' 
+            })}\n\n`))
+            
+            controller.close()
+          } catch (error) {
+            console.error('Streaming error:', error)
+            const encoder = new TextEncoder()
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ 
+              type: 'error', 
+              error: (error as Error).message 
+            })}\n\n`))
+            controller.close()
+          }
+        }
+      })
+
+      return new Response(stream, {
+        headers: {
+          'Content-Type': 'text/stream',
+          'Cache-Control': 'no-cache',
+          'Connection': 'keep-alive',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'POST',
+          'Access-Control-Allow-Headers': 'Content-Type, Accept'
+        }
+      })
+    } else {
+      // Non-streaming fallback (existing behavior)
+      const completion = await client.chat.completions.create({
+        model,
+        messages: [
+          { role: 'system', content: systemPrompts[type] },
+          { role: 'user', content: prompt }
+        ]
+      })
+
+      const content = completion.choices[0]?.message?.content || ''
+      return NextResponse.json({ prompt, output: content, type })
+    }
   } catch (e) {
     console.error(e)
     return NextResponse.json({ error: (e as Error).message }, { status: 500 })

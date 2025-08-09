@@ -69,35 +69,35 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      <div className="relative mx-auto max-w-7xl px-6 py-8">
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4">
         <motion.header
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="mb-8 text-center"
+          className="mb-4 text-center"
         >
           <div className="relative">
-            <h1 className="text-5xl font-extrabold tracking-tight bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent mb-4">
+            <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent mb-2">
               Playground
             </h1>
             <div className="absolute -inset-1 bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-pink-600/20 blur-3xl -z-10"></div>
           </div>
-          <p className="text-lg text-gray-300 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-sm text-gray-300 max-w-2xl mx-auto leading-relaxed">
             Create, refine, and perfect your prompts with AI assistance. Transform your ideas into powerful, effective prompts.
           </p>
           
           {/* Feature highlights */}
-          <div className="flex justify-center gap-6 mt-6">
-            <div className="flex items-center gap-2 text-sm text-gray-400">
-              <div className="w-2 h-2 rounded-full bg-green-400"></div>
+          <div className="flex justify-center gap-4 mt-3">
+            <div className="flex items-center gap-1 text-xs text-gray-400">
+              <div className="w-1.5 h-1.5 rounded-full bg-green-400"></div>
               AI-Powered Enhancement
             </div>
-            <div className="flex items-center gap-2 text-sm text-gray-400">
-              <div className="w-2 h-2 rounded-full bg-blue-400"></div>
+            <div className="flex items-center gap-1 text-xs text-gray-400">
+              <div className="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
               Real-time Preview
             </div>
-            <div className="flex items-center gap-2 text-sm text-gray-400">
-              <div className="w-2 h-2 rounded-full bg-purple-400"></div>
+            <div className="flex items-center gap-1 text-xs text-gray-400">
+              <div className="w-1.5 h-1.5 rounded-full bg-purple-400"></div>
               Multiple Models
             </div>
           </div>
@@ -105,27 +105,14 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
         {/* Enhanced main content area */}
         <motion.main
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="fit-vh"
-        >
-          {children}
-        </motion.main>
-
-        <motion.footer
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3, duration: 0.5 }}
-          className="mt-12 text-center"
-        >
-          <div className="inline-flex items-center gap-2 text-sm text-gray-400 bg-white/5 backdrop-blur-sm rounded-full px-6 py-3 border border-white/10">
-            <span>Built with</span>
-            <span className="text-red-400 animate-pulse">❤️</span>
-            <span>for better prompts</span>
-          </div>
-        </motion.footer>
-      </div>
+           initial={{ opacity: 0, y: 20 }}
+           animate={{ opacity: 1, y: 0 }}
+           transition={{ duration: 0.6, delay: 0.1 }}
+           className="min-h-[calc(100vh-180px)] grid items-start"
+         >
+           {children}
+         </motion.main>
+       </div>
     </MotionConfig>
   )
 }

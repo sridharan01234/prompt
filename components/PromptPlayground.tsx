@@ -6,6 +6,7 @@ import { supportPrompt, SupportPromptType } from '@/lib/prompt-core'
 import { createPortal } from 'react-dom'
 import { useAuth } from './AuthProvider'
 import { GoogleSignInButton, GoogleOneTapSignIn } from './GoogleSignInButton'
+import { useStreamingApi } from '@/lib/useStreamingApi'
 
 // Enhanced reusable dropdown component with modern styling
 interface DropdownOption {
@@ -334,6 +335,49 @@ export default function PromptPlayground() {
   const [loading, setLoading] = useState<boolean>(false)
   const [copied, setCopied] = useState<boolean>(false)
 
+  // Initialize streaming API hook
+  const {
+    isStreaming,
+    streamedContent,
+    error: streamError,
+    startStreaming,
+    cancelStreaming,
+    resetStream
+  } = useStreamingApi({
+    onContent: (content) => {
+      // Real-time content updates as they stream in
+      // This callback is called for each chunk received
+    },
+    onComplete: (fullContent) => {
+      // Called when streaming is complete
+      setAiOutput(fullContent)
+      setLoading(false)
+    },
+    onError: (errorMessage) => {
+      // Handle streaming errors
+      setError(errorMessage)
+      setLoading(false)
+    },
+    onMetadata: (metadata) => {
+      // Handle initial metadata from stream
+      console.log('Stream metadata:', metadata)
+    }
+  })
+
+  // Update aiOutput with streamed content in real-time
+  useEffect(() => {
+    if (streamedContent) {
+      setAiOutput(streamedContent)
+    }
+  }, [streamedContent])
+
+  // Update error state from streaming
+  useEffect(() => {
+    if (streamError) {
+      setError(streamError)
+    }
+  }, [streamError])
+
   // 3D tilt for the left card
   const [tilt, setTilt] = useState<{ rx: number; ry: number }>({ rx: 0, ry: 0 })
   const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
@@ -406,10 +450,14 @@ export default function PromptPlayground() {
   }, [])
 
   useEffect(() => {
-    // Keyboard shortcuts: Cmd/Ctrl+Enter = Ask OpenAI, Cmd/Ctrl+K = focus input
+    // Keyboard shortcuts: Cmd/Ctrl+Enter = Ask OpenAI, Cmd/Ctrl+K = focus input, Esc = cancel streaming
     const handler = (e: KeyboardEvent) => {
       const mod = e.metaKey || e.ctrlKey
-      if (!mod) return
+      if (e.key === 'Escape' && (loading || isStreaming)) {
+        e.preventDefault()
+        onCancelRequest()
+      } else if (!mod) return
+      
       if (e.key.toLowerCase() === 'enter') {
         e.preventDefault()
         onAskOpenAI()
@@ -421,34 +469,63 @@ export default function PromptPlayground() {
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [model, userText, language])
+  }, [model, userText, language, loading, isStreaming])
 
+  /**
+   * Initiates AI request with streaming or fallback support
+   * Handles authentication, model validation, and request preparation
+   */
   const onAskOpenAI = async () => {
-    if (loading) return
+    // Prevent multiple concurrent requests
+    if (loading || isStreaming) return
+    
+    // Reset previous state
     setError('')
     setAiOutput('')
-    // Prevent free users from sending requests to premium models
+    resetStream()
+    
+    // Validate authentication for premium models
     if (!isAuthenticated && premiumModels.includes(model)) {
       setError('Sign in with Google to use premium models.')
       return
     }
+    
+    // Set loading state
     setLoading(true)
+    
     try {
-      const params = { userInput: userText, language }
-      const res = await fetch('/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ model: model || undefined, type: promptType, params })
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Request failed')
-      // We only show the AI response now
-      setAiOutput(data.output)
+      // Prepare request parameters
+      const requestParams = { 
+        userInput: userText, 
+        language 
+      }
+      
+      const requestBody = { 
+        model: model || undefined, 
+        type: promptType, 
+        params: requestParams 
+      }
+
+      // Start streaming request with fallback support
+      await startStreaming('/api/generate', requestBody, true)
+      
     } catch (e) {
+      // Handle any setup errors
       setError((e as Error).message)
-    } finally {
       setLoading(false)
     }
+  }
+
+  /**
+   * Cancels the current AI request
+   * Handles both streaming and regular request cancellation
+   */
+  const onCancelRequest = () => {
+    if (isStreaming) {
+      cancelStreaming()
+    }
+    setLoading(false)
+    setError('')
   }
 
   const onCopy = async (text: string) => {
@@ -474,7 +551,7 @@ export default function PromptPlayground() {
             className="fixed right-6 top-6 z-50 rounded-xl border border-green-400/30 bg-green-500/10 backdrop-blur-xl px-4 py-3 text-sm text-green-300 shadow-2xl"
           >
             <div className="flex items-center gap-2">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
               </svg>
               Copied to clipboard!
@@ -483,10 +560,10 @@ export default function PromptPlayground() {
         )}
       </AnimatePresence>
 
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 content-start items-start">
         {/* Left column - Input */}
         <motion.section 
-          className="card group hover:scale-[1.02] transition-transform duration-300"
+          className="card group hover:scale-[1.01] transition-transform duration-300 self-start"
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
@@ -497,16 +574,16 @@ export default function PromptPlayground() {
           }}
         >
           {/* Card header */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                 </svg>
               </div>
               <div>
-                <h2 className="text-xl font-bold text-white">Playground</h2>
-                <p className="text-sm text-gray-300">Describe your task, get refined prompts</p>
+                <h2 className="text-lg font-bold text-white">Playground</h2>
+                <p className="text-xs text-gray-300">Describe your task, get refined prompts</p>
               </div>
             </div>
             
@@ -544,85 +621,86 @@ export default function PromptPlayground() {
           </div>
 
           {/* Control selections */}
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3 mb-6">
-            <div className="panel group hover:bg-white/8 transition-all duration-300">
-              <label className="mb-2 block text-sm font-semibold text-gray-200">Prompt type</label>
-              <ModernDropdown
-                value={promptType}
-                onChange={(value) => setPromptType(value as SupportPromptType)}
-                options={promptTypes.map(type => ({ 
-                  value: type, 
-                  label: type,
-                  icon: type === 'ENHANCE' ? '✨' : type === 'CODING' ? '💻' : type === 'TRANSLATE' ? '🌐' : '📝'
-                }))}
-                placeholder="Select prompt type"
-              />
-            </div>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-3 mb-4 items-stretch auto-rows-fr">
+            <div className="panel h-full group hover:bg-white/8 transition-all duration-300 flex flex-col">
+               <label className="mb-1 block text-xs font-semibold text-gray-200">Prompt type</label>
+               <ModernDropdown
+                 value={promptType}
+                 onChange={(value) => setPromptType(value as SupportPromptType)}
+                 options={promptTypes.map(type => ({ 
+                   value: type, 
+                   label: type,
+                   icon: type === 'ENHANCE' ? '✨' : type === 'ANALYZE' ? '🔍' : type === 'DEBUG' ? '🐛' : 
+                         type === 'OPTIMIZE' ? '⚡' : type === 'DOCUMENT' ? '�' : type === 'TEST' ? '🧪' : '📝'
+                 }))}
+                 placeholder="Select prompt type"
+               />
+             </div>
 
-            <div className="panel group hover:bg-white/8 transition-all duration-300">
-              <label className="mb-2 block text-sm font-semibold text-gray-200">Language</label>
-              <ModernDropdown
-                value={language}
-                onChange={setLanguage}
-                options={languageOptions.map(lang => ({
-                  value: lang,
-                  label: lang,
-                  icon: lang === 'TypeScript' ? '🔷' : lang === 'JavaScript' ? '💛' : lang === 'Python' ? '🐍' : 
-                        lang === 'Java' ? '☕' : lang === 'Go' ? '🔵' : lang === 'Rust' ? '🦀' : '📄'
-                }))}
-                placeholder="Select language"
-                searchable={true}
-              />
-            </div>
+            <div className="panel h-full group hover:bg-white/8 transition-all duration-300 flex flex-col">
+               <label className="mb-1 block text-xs font-semibold text-gray-200">Language</label>
+               <ModernDropdown
+                 value={language}
+                 onChange={setLanguage}
+                 options={languageOptions.map(lang => ({
+                   value: lang,
+                   label: lang,
+                   icon: lang === 'TypeScript' ? '🔷' : lang === 'JavaScript' ? '💛' : lang === 'Python' ? '🐍' : 
+                         lang === 'Java' ? '☕' : lang === 'Go' ? '🔵' : lang === 'Rust' ? '🦀' : '📄'
+                 }))}
+                 placeholder="Select language"
+                 searchable={true}
+               />
+             </div>
 
-            <div className="panel group hover:bg-white/8 transition-all duration-300">
-              <div className="mb-2 flex items-center justify-between">
-                <label className="text-sm font-semibold text-gray-200">OpenAI model</label>
-                <span className="kbd">⌘K</span>
-              </div>
-              <ModelDropdown
-                value={model}
-                onChange={setModel}
-                limited={limitedModels}
-                premium={premiumModels}
-                authed={isAuthenticated}
-                loading={modelsLoading}
-                error={modelsError}
-              />
-              {!isAuthenticated && premiumModels.includes(model) && (
-                <motion.p 
-                  className="mt-2 text-xs text-amber-300 bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  🔒 Premium model selected. Sign in to use it, or pick a free model.
-                </motion.p>
-              )}
-            </div>
-          </div>
+            <div className="panel h-full group hover:bg-white/8 transition-all duration-300 flex flex-col">
+               <div className="mb-1 flex items-center justify-between">
+                 <label className="text-xs font-semibold text-gray-200">OpenAI model</label>
+                 <span className="kbd text-[10px] px-2 py-1">⌘K</span>
+               </div>
+               <ModelDropdown
+                 value={model}
+                 onChange={setModel}
+                 limited={limitedModels}
+                 premium={premiumModels}
+                 authed={isAuthenticated}
+                 loading={modelsLoading}
+                 error={modelsError}
+               />
+               {!isAuthenticated && premiumModels.includes(model) && (
+                 <motion.p 
+                   className="mt-2 text-xs text-amber-300 bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2"
+                   initial={{ opacity: 0, y: -10 }}
+                   animate={{ opacity: 1, y: 0 }}
+                   transition={{ duration: 0.3 }}
+                 >
+                   🔒 Premium model selected. Sign in to use it, or pick a free model.
+                 </motion.p>
+               )}
+             </div>
+           </div>
 
           {/* Input area */}
           <div className="panel group hover:bg-white/8 transition-all duration-300">
-            <div className="mb-3 flex items-center justify-between">
-              <label className="text-sm font-semibold text-gray-200 flex items-center gap-2">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="mb-2 flex items-center justify-between">
+              <label className="text-xs font-semibold text-gray-200 flex items-center gap-2">
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
                 Your input
               </label>
               <div className="flex items-center gap-2">
                 <span className="text-xs text-gray-400">{charCount} chars</span>
-                <div className={`w-2 h-2 rounded-full ${charCount > 0 ? 'bg-green-400' : 'bg-gray-500'} transition-colors duration-200`}></div>
+                <div className={`w-1.5 h-1.5 rounded-full ${charCount > 0 ? 'bg-green-400' : 'bg-gray-500'} transition-colors duration-200`}></div>
               </div>
             </div>
             <textarea
               ref={inputRef}
-              rows={10}
+              rows={6}
               value={userText}
               onChange={(e) => setUserText(e.target.value)}
-              className="font-mono text-sm bg-black/30 border border-white/20 rounded-xl p-4 text-white placeholder-gray-400 focus:border-blue-400/50 focus:bg-black/40 transition-all duration-200 resize-none"
-              placeholder="Describe what you need... For example: 'Write a function to sort an array efficiently' or 'Create a marketing email for a new product launch'"
+              className="font-mono text-sm bg-black/30 border border-white/20 rounded-xl p-3 text-white placeholder-gray-400 focus:border-blue-400/50 focus:bg-black/40 transition-all duration-200 resize-none"
+              placeholder="Describe what you need... For example: 'Write a function to sort an array efficiently'"
             />
             {error && (
               <motion.p 
@@ -642,47 +720,47 @@ export default function PromptPlayground() {
           </div>
 
           {/* Action buttons */}
-          <div className="flex flex-wrap gap-3 mt-6">
+          <div className="flex flex-wrap gap-2 mt-3">
             <motion.button 
               onClick={onAskOpenAI} 
               disabled={loading || modelsLoading || !model}
-              className="btn-primary flex-1 min-w-[200px] flex items-center justify-center gap-2 relative overflow-hidden"
+              className="btn-primary flex-1 min-w-[180px] flex items-center justify-center gap-2 relative overflow-hidden py-2"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               transition={{ duration: 0.2 }}
             >
               {loading ? (
                 <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                  Generating...
+                  <div className="animate-spin rounded-full h-3 w-3 border-2 border-white border-t-transparent"></div>
+                  <span className="text-sm">Generating...</span>
                 </>
               ) : (
                 <>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
-                  Generate with AI
+                  <span className="text-sm">Generate with AI</span>
                 </>
               )}
             </motion.button>
             <motion.button 
               onClick={() => setUserText('')} 
-              className="btn-secondary flex items-center gap-2"
+              className="btn-secondary flex items-center gap-2 px-3 py-2"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               transition={{ duration: 0.2 }}
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
-              Reset
+              <span className="text-sm">Reset</span>
             </motion.button>
           </div>
         </motion.section>
 
         {/* Right column - Output */}
         <motion.section 
-          className="card group hover:scale-[1.02] transition-transform duration-300"
+          className="card group hover:scale-[1.02] transition-transform duration-300 self-start"
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
@@ -716,7 +794,7 @@ export default function PromptPlayground() {
           </div>
 
           {/* Output content */}
-          {loading ? (
+          {loading && !isStreaming ? (
             <div className="space-y-3 rounded-xl border border-white/10 bg-black/20 backdrop-blur-md p-6">
               <div className="flex items-center gap-3 mb-4">
                 <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-400 border-t-transparent"></div>
@@ -739,9 +817,10 @@ export default function PromptPlayground() {
                   </div>
                 )}
               </pre>
-              {aiOutput && (
-                <div className="absolute top-2 right-2">
-                  <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
+              {(aiOutput || isStreaming) && (
+                <div className="absolute top-2 right-2 flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full ${isStreaming ? 'bg-blue-400 animate-pulse' : 'bg-green-400'}`}></div>
+                  {isStreaming && <span className="text-[10px] text-blue-300">streaming…</span>}
                 </div>
               )}
             </div>
