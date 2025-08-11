@@ -276,79 +276,32 @@ How to measure and validate the optimizations
 </output_format>`,
 	},
 	DOCUMENT: {
-		template: `You are a technical documentation expert specializing in \${language} with expertise in creating clear, comprehensive, and maintainable documentation.
+		template: `You are a technical documentation expert specializing in \${language}. Generate a clear, complete Markdown document for the following code/system or description.
 
-<documentation_context>
-Language: \${language}
-Code/System to document: \${userInput}
-</documentation_context>
+Context:
+- Language/Stack: \${language}
+- Subject to document:
+\n\n\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
+\${userInput}
 
-<documentation_strategy>
-Create multi-layered documentation following best practices:
+Requirements:
+ - Output final documentation in Markdown only (no XML/HTML-esque wrapper tags, no commentary about what you will do).
+- Make it self-contained and skimmable with headings, lists, and code blocks.
+- Include, where applicable:
+	1. Title and short overview
+	2. Installation/setup or prerequisites
+  3. Usage with examples (fenced code blocks for \${language} when relevant)
+	4. API/parameters and return types
+	5. Configuration and environment variables
+	6. Implementation notes and design decisions
+	7. Common pitfalls and troubleshooting
+	8. Testing and maintenance guidance
+	9. Versioning/compatibility notes
+- Keep examples realistic. Prefer concise code illustrating typical and edge cases.
+- If parts are unknown from the context, omit them rather than inventing details.
 
-1. **Audience Analysis**: Identify who will use this documentation
-2. **Documentation Hierarchy**: 
-   - High-level overview (what it does, why it exists)
-   - API/Interface documentation (how to use it)
-   - Implementation details (how it works internally)
-   - Examples and usage patterns
-3. **Code Documentation Standards**: Language-specific conventions
-4. **Maintenance Considerations**: Keep docs up-to-date and discoverable
-</documentation_strategy>
-
-<expert_perspectives>
-- **API Designer**: Clear interface documentation and usage examples
-- **Maintainer**: Implementation details and design decisions
-- **New Developer**: Onboarding and learning materials
-- **Integration Specialist**: How this fits into larger systems
-</expert_perspectives>
-
-<output_format>
-<overview>
-## [Component/Module Name]
-
-Brief description of purpose and functionality
-</overview>
-
-<api_documentation>
-### Usage
-
-\`\`\`\${language}
-// Clear usage examples with expected inputs/outputs
-\`\`\`
-
-### Parameters
-- \`param1\`: Description, type, constraints
-- \`param2\`: Description, type, constraints
-
-### Returns
-Description of return value and type
-</api_documentation>
-
-<implementation_details>
-### Implementation Notes
-- Key design decisions and rationale
-- Important algorithms or patterns used
-- Performance characteristics
-- Dependencies and requirements
-</implementation_details>
-
-<examples>
-### Examples
-
-\`\`\`\${language}
-// Real-world usage examples
-// Including common patterns and edge cases
-\`\`\`
-</examples>
-
-<maintenance>
-### Development Notes
-- How to extend or modify
-- Testing strategy
-- Known limitations or future improvements
-</maintenance>
-</output_format>`,
+Deliverable:
+Return only the finished Markdown document, ready to paste into a README or docs site.`,
 	},
 	TEST: {
 		template: `You are a testing expert with deep knowledge of \${language} testing frameworks, methodologies, and best practices including unit testing, integration testing, and test-driven development.

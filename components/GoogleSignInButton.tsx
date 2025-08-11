@@ -31,19 +31,18 @@ export function GoogleSignInButton({
       text,
       size,
       width,
-      theme: 'filled_black',
+      theme: 'outline',
       type: 'standard',
       shape: 'rectangular',
       logo_alignment: 'left',
     })
 
-    // Apply custom styling to the Google button
+    // Apply clean styling to the Google button
     const iframe = buttonRef.current.querySelector('iframe')
     if (iframe) {
-      iframe.style.borderRadius = '12px'
-      iframe.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.25)'
-      iframe.style.border = '1px solid rgba(255, 255, 255, 0.1)'
-      iframe.style.transition = 'all 0.3s ease'
+      iframe.style.borderRadius = '8px'
+      iframe.style.border = 'none'
+      iframe.style.transition = 'all 0.2s ease'
     }
   }, [text, size, width, isAuthenticated])
 
@@ -52,12 +51,10 @@ export function GoogleSignInButton({
   }
 
   return (
-    <div className={`relative group ${className}`}>
-      {/* Custom wrapper with modern styling */}
-      <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-xl blur-sm group-hover:blur-md transition-all duration-300"></div>
+    <div className={`relative ${className}`}>
       <div 
         ref={buttonRef}
-        className="relative rounded-xl overflow-hidden backdrop-blur-sm border border-white/10 hover:border-white/20 transition-all duration-300 hover:scale-105"
+        className="rounded-lg overflow-hidden border border-gray-200 hover:border-gray-300 transition-all duration-200 hover:shadow-sm"
       ></div>
     </div>
   )
