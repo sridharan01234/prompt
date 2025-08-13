@@ -499,12 +499,12 @@ export default function PromptPlayground() {
   const [promptType, setPromptType] = useState<SupportPromptType>('ENHANCE')
   const promptTypeOptions: { value: SupportPromptType; label: string; icon: string; description: string }[] = useMemo(
     () => [
-      { value: 'ENHANCE', label: 'Enhance', icon: '✨', description: 'Improve and refine your prompt' },
-      { value: 'ANALYZE', label: 'Analyze', icon: '🔍', description: 'Deep analysis and insights' },
-      { value: 'DEBUG', label: 'Debug', icon: '🐛', description: 'Find and fix issues' },
-      { value: 'OPTIMIZE', label: 'Optimize', icon: '⚡', description: 'Performance improvements' },
-      { value: 'DOCUMENT', label: 'Document', icon: '📝', description: 'Create documentation' },
-      { value: 'TEST', label: 'Test', icon: '🧪', description: 'Generate test cases' }
+      { value: 'ENHANCE', label: 'Enhance', icon: '✨', description: 'Transform basic prompts into powerful, structured instructions' },
+      { value: 'ANALYZE', label: 'Analyze', icon: '🔍', description: 'Get comprehensive code review with security and performance insights' },
+      { value: 'DEBUG', label: 'Debug', icon: '🐛', description: 'Systematic problem-solving with root cause analysis' },
+      { value: 'OPTIMIZE', label: 'Optimize', icon: '⚡', description: 'Improve performance, algorithms, and resource efficiency' },
+      { value: 'DOCUMENT', label: 'Document', icon: '�', description: 'Generate complete technical documentation with examples' },
+      { value: 'TEST', label: 'Test', icon: '🧪', description: 'Create comprehensive test suites with edge case coverage' }
     ],
     []
   )
@@ -583,6 +583,18 @@ export default function PromptPlayground() {
     await navigator.clipboard.writeText(text)
     setCopied(true)
     setTimeout(() => setCopied(false), 1200)
+  }
+
+  const getPlaceholderText = (type: SupportPromptType): string => {
+    const placeholders = {
+      ENHANCE: 'Enter a basic prompt to enhance, e.g., "Write a function to sort data" or "Create a login form"',
+      ANALYZE: 'Paste code you want analyzed for security, performance, and quality issues',
+      DEBUG: 'Describe the error or issue you\'re experiencing, include error messages and relevant code',
+      OPTIMIZE: 'Share code or describe the system you want to optimize for better performance',
+      DOCUMENT: 'Paste code, function, or describe the project you want to document',
+      TEST: 'Paste the code or function you want to create comprehensive tests for'
+    }
+    return placeholders[type]
   }
 
   const charCount = userText.length
@@ -750,7 +762,7 @@ export default function PromptPlayground() {
               value={userText}
               onChange={(e) => setUserText(e.target.value)}
               className="w-full h-40 resize-none"
-              placeholder="Describe what you want to accomplish. Be as specific as possible..."
+              placeholder={getPlaceholderText(promptType)}
             />
           </div>
 

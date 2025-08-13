@@ -75,315 +75,527 @@ export type SupportPromptType = "ENHANCE" | "ANALYZE" | "DEBUG" | "OPTIMIZE" | "
 
 const supportPromptConfigs: Record<SupportPromptType, SupportPromptConfig> = {
 	ENHANCE: {
-		template: `You are an expert prompt engineer with deep knowledge of advanced prompting techniques including Chain-of-Thought, Tree of Thoughts, Meta Prompting, and Self-Consistency approaches.
+		template: `You are an expert prompt engineer specializing in creating effective, structured prompts using proven techniques like Chain-of-Thought, Few-Shot Learning, and Clear Output Formatting.
 
-Your task is to enhance the provided prompt using research-backed techniques from the latest prompt engineering studies.
+### INSTRUCTION ###
+Enhance the provided prompt to make it more effective, specific, and likely to produce high-quality results. Use research-backed prompt engineering techniques.
 
-<context>
-Programming language: \${language}
-Current prompt: \${userInput}
-</context>
+### CONTEXT ###
+Programming Language: \${language}
+Current Prompt: \${userInput}
 
-<enhancement_process>
-Think step by step about how to improve this prompt:
+### ENHANCEMENT EXAMPLES ###
 
-1. **Analysis Phase**: Examine the current prompt for clarity, specificity, and structure
-2. **Expert Perspectives**: Consider how 3 different prompt engineering experts would approach this
-3. **Technique Application**: Apply relevant advanced techniques (CoT, ToT, few-shot, meta-prompting)
-4. **Structure Optimization**: Ensure proper task context, examples, and output formatting
-5. **Validation**: Check for potential edge cases and error handling
-</enhancement_process>
+Example 1:
+Original: "Write code to sort a list"
+Enhanced: "You are an expert \${language} developer. Write clean, efficient code to sort a list.
 
-<examples>
-Example of good enhancement:
-- Original: "Write code to sort a list"
-- Enhanced: "You are an expert software engineer. Write efficient, well-documented code to sort a list.
+**Requirements:**
+- Include proper error handling for edge cases (empty lists, null values)
+- Add comprehensive documentation/comments
+- Optimize for both readability and performance
+- Use appropriate data structures and algorithms
 
-<requirements>
-- Language: Python
-- Include error handling for edge cases
-- Add type hints and docstrings
-- Optimize for readability and performance
-</requirements>
+**Example Output Format:**
+\`\`\`\${language}
+// Your solution with detailed comments explaining the approach
+\`\`\`
 
-<examples>
-def sort_list(items: List[int]) -> List[int]:
-    \"\"\"Sort a list of integers in ascending order.\"\"\"
-    if not items:
-        return []
-    return sorted(items)
-</examples>
+**Explanation:** Brief explanation of your chosen approach and its time/space complexity."
 
-Think through your approach step by step, then provide the optimized code with explanations."
-</examples>
+Example 2:
+Original: "Explain this function"
+Enhanced: "You are a technical documentation expert. Analyze the following \${language} function and provide a comprehensive explanation.
 
-<output_format>
-Provide only the enhanced prompt - no meta-commentary, explanations, or surrounding quotes. The enhanced prompt should be immediately usable and significantly more effective than the original.
-</output_format>`,
+**Analysis Framework:**
+1. Purpose and functionality
+2. Parameters and return values
+3. Algorithm or logic used
+4. Time and space complexity
+5. Potential edge cases or limitations
+
+**Function to analyze:**
+[Insert function code here]
+
+**Format your response as:**
+- **Purpose:** What the function does
+- **How it works:** Step-by-step breakdown
+- **Usage examples:** 2-3 practical examples
+- **Notes:** Important considerations or gotchas"
+
+### ENHANCEMENT PROCESS ###
+Let's think step by step:
+
+1. **Analyze Current Prompt:** Identify what's missing (specificity, context, examples, output format)
+2. **Add Clear Instructions:** Use specific action verbs and clear expectations
+3. **Provide Context:** Include relevant background and constraints
+4. **Structure with Separators:** Use ### or ** for clear sections
+5. **Add Examples:** Show expected input/output patterns where helpful
+6. **Specify Output Format:** Define exactly how the response should be structured
+7. **Include Edge Cases:** Address potential complications or special scenarios
+
+### OUTPUT FORMAT ###
+Return only the enhanced prompt - ready to use immediately. Make it significantly more effective than the original by applying the principles above.`,
 	},
 	ANALYZE: {
-		template: `You are a senior code reviewer and software architect with expertise in \${language} and software engineering best practices.
+		template: `You are a senior software architect and code reviewer with deep expertise in \${language}, security, performance, and software engineering best practices.
 
-<task_context>
-Perform a comprehensive analysis of the provided code, examining it from multiple expert perspectives:
-- Code Quality Expert: Structure, readability, maintainability
-- Security Specialist: Vulnerabilities and security best practices  
-- Performance Engineer: Efficiency and optimization opportunities
-- Architecture Reviewer: Design patterns and system design
-</task_context>
+### INSTRUCTION ###
+Perform a comprehensive code analysis from multiple expert perspectives. Provide actionable insights and specific improvement recommendations.
 
-<code_to_analyze>
-\${userInput}
-</code_to_analyze>
+### CONTEXT ###
+Programming Language: \${language}
+Code to Analyze: \${userInput}
 
-<analysis_framework>
-1. **First Pass - Overview**: Understand the code's purpose and high-level structure
-2. **Deep Dive Analysis**: Examine each expert perspective systematically
-3. **Issue Identification**: Catalog problems by severity (Critical, High, Medium, Low)
-4. **Improvement Recommendations**: Provide specific, actionable suggestions
-5. **Best Practices Check**: Verify alignment with \${language} conventions
-</analysis_framework>
+### ANALYSIS EXAMPLES ###
 
-<output_format>
-<overview>
-Brief description of what the code does
-</overview>
+Example Input: Simple function with issues
+\`\`\`python
+def get_user_data(id):
+    user = db.query("SELECT * FROM users WHERE id = " + str(id))
+    return user[0]
+\`\`\`
 
-<findings>
-**Critical Issues:**
-- [List any critical problems]
+Example Analysis:
+**OVERVIEW:** Function retrieves user data by ID but has critical security and reliability issues.
 
-**Improvements:**
-- [Specific recommendations with code examples]
+**CRITICAL ISSUES:**
+- SQL injection vulnerability (concatenated query)
+- No error handling for empty results
+- No input validation
 
-**Best Practices:**
-- [Alignment with language conventions]
-</findings>
+**IMPROVEMENTS:**
+- Use parameterized queries: \`cursor.execute("SELECT * FROM users WHERE id = %s", (id,))\`
+- Add input validation: \`if not isinstance(id, int) or id <= 0: raise ValueError\`
+- Handle empty results: \`return user[0] if user else None\`
 
-<recommendations>
-Priority-ordered list of actionable improvements
-</recommendations>
-</output_format>`,
+**RECOMMENDATIONS:**
+1. **HIGH PRIORITY:** Fix SQL injection (security vulnerability)
+2. **MEDIUM:** Add comprehensive error handling
+3. **LOW:** Consider adding logging and type hints
+
+### ANALYSIS FRAMEWORK ###
+Let's analyze this systematically:
+
+1. **First Pass:** Understand the code's purpose and high-level structure
+2. **Security Review:** Check for vulnerabilities, input validation, and secure coding practices
+3. **Performance Analysis:** Identify bottlenecks, inefficient algorithms, or resource usage issues
+4. **Code Quality Assessment:** Evaluate readability, maintainability, and adherence to best practices
+5. **Architecture Review:** Assess design patterns, separation of concerns, and overall structure
+
+### OUTPUT FORMAT ###
+**OVERVIEW:**
+[Brief description of what the code does and its main purpose]
+
+**CRITICAL ISSUES:**
+- [Any security vulnerabilities or major problems]
+- [Issues that could cause system failures]
+
+**IMPROVEMENTS:**
+- [Specific code improvements with examples]
+- [Performance optimizations]
+- [Better error handling approaches]
+
+**RECOMMENDATIONS:**
+1. **HIGH PRIORITY:** [Most important fixes first]
+2. **MEDIUM PRIORITY:** [Important but not critical]
+3. **LOW PRIORITY:** [Nice-to-have improvements]
+
+**BEST PRACTICES ALIGNMENT:**
+- [How well the code follows \${language} conventions]
+- [Suggestions for better adherence to standards]`,
 	},
 	DEBUG: {
-		template: `You are an expert debugging specialist with deep knowledge of \${language} and systematic problem-solving approaches.
+		template: `You are an expert debugging specialist with systematic problem-solving skills and deep knowledge of \${language} debugging techniques and common error patterns.
 
-<debugging_context>
-Language: \${language}
-Issue/Error: \${userInput}
-</debugging_context>
+### INSTRUCTION ###
+Debug the provided issue using proven systematic debugging methodology. Identify the root cause and provide a complete solution with explanation.
 
-<debugging_methodology>
-Let's approach this systematically using proven debugging techniques:
+### CONTEXT ###
+Programming Language: \${language}
+Issue/Error Description: \${userInput}
 
-1. **Problem Understanding**: Clearly define what's wrong vs expected behavior
-2. **Hypothesis Generation**: Consider multiple potential root causes
-3. **Evidence Gathering**: What information do we have/need?
-4. **Systematic Testing**: Step-by-step isolation of the issue
-5. **Root Cause Analysis**: Identify the fundamental cause
-6. **Solution Implementation**: Provide specific fixes
-7. **Prevention Strategy**: How to avoid similar issues
-</debugging_methodology>
+### DEBUGGING EXAMPLES ###
 
-<expert_perspectives>
-Consider insights from:
-- **Syntax Expert**: Language-specific gotchas and common mistakes
-- **Logic Analyst**: Algorithm and flow issues  
-- **Environment Specialist**: Runtime, dependencies, configuration problems
-- **Performance Debugger**: Memory, efficiency, and resource issues
-</expert_perspectives>
-
-<output_format>
-<problem_analysis>
-Clear description of the issue and its symptoms
-</problem_analysis>
-
-<root_cause>
-The fundamental reason this problem occurs
-</root_cause>
-
-<solution>
-\`\`\`\${language}
-// Fixed code with explanatory comments
+Example 1:
+Issue: "My Python function returns None instead of the expected list"
+\`\`\`python
+def get_numbers():
+    numbers = [1, 2, 3, 4, 5]
+    numbers.append(6)
 \`\`\`
-</solution>
 
-<explanation>
-Step-by-step explanation of the fix and why it works
-</explanation>
+Debug Analysis:
+**PROBLEM:** Function doesn't explicitly return the list
+**ROOT CAUSE:** Missing return statement - function implicitly returns None
+**SOLUTION:** Add \`return numbers\` at the end
+**EXPLANATION:** In Python, functions without explicit return statements return None by default
 
-<prevention>
-How to avoid this type of issue in the future
-</prevention>
-</output_format>`,
+Example 2:
+Issue: "Getting 'list index out of range' error"
+**PROBLEM:** Accessing array index that doesn't exist
+**ROOT CAUSE:** Loop or access pattern exceeding array bounds
+**SOLUTION:** Add bounds checking: \`if index < len(array):\`
+**PREVENTION:** Use enumerate() or proper range() bounds
+
+### DEBUGGING METHODOLOGY ###
+Let's debug this step by step:
+
+1. **Problem Understanding:** Clearly define symptoms vs expected behavior
+2. **Information Gathering:** What error messages, logs, or symptoms do we have?
+3. **Hypothesis Formation:** What are the most likely root causes?
+4. **Systematic Testing:** How can we isolate and test each hypothesis?
+5. **Root Cause Identification:** What is the fundamental underlying issue?
+6. **Solution Implementation:** Provide the specific fix with code examples
+7. **Prevention Strategy:** How to avoid similar issues in the future
+
+### EXPERT PERSPECTIVES ###
+Consider insights from multiple debugging specialists:
+- **Syntax Expert:** Language-specific gotchas and common syntax mistakes
+- **Logic Analyst:** Algorithm flow, conditional logic, and state management issues
+- **Environment Specialist:** Runtime, dependencies, configuration, and deployment problems
+- **Performance Debugger:** Memory leaks, efficiency issues, and resource constraints
+
+### OUTPUT FORMAT ###
+**PROBLEM ANALYSIS:**
+[Clear description of the issue and its symptoms]
+
+**ROOT CAUSE:**
+[The fundamental reason this problem occurs]
+
+**SOLUTION:**
+\`\`\`\${language}
+// Fixed code with explanatory comments showing the changes
+\`\`\`
+
+**EXPLANATION:**
+[Step-by-step explanation of why this solution works and what was wrong]
+
+**PREVENTION TIPS:**
+- [How to avoid this type of issue in the future]
+- [Best practices to prevent similar problems]
+- [Tools or techniques that can help catch these issues early]
+
+**TESTING APPROACH:**
+[How to verify the fix works and test for edge cases]`,
 	},
 	OPTIMIZE: {
-		template: `You are a performance optimization expert specializing in \${language} with deep knowledge of algorithmic efficiency, memory management, and system performance.
+		template: `You are a performance optimization expert specializing in \${language} with deep knowledge of algorithmic efficiency, memory management, and system performance optimization.
 
-<optimization_context>
+### INSTRUCTION ###
+Optimize the provided code/system for better performance. Focus on algorithmic improvements, memory optimization, and computational efficiency while maintaining code readability.
+
+### CONTEXT ###
 Target Language: \${language}
-Code/System to optimize: \${userInput}
-</optimization_context>
+Code/System to Optimize: \${userInput}
 
-<optimization_strategy>
-Apply systematic optimization approach:
+### OPTIMIZATION EXAMPLES ###
 
-1. **Performance Profiling**: Identify current bottlenecks and inefficiencies
-2. **Algorithmic Analysis**: Examine time/space complexity (Big O analysis)
-3. **Multiple Optimization Vectors**: 
-   - Algorithm efficiency (better data structures, algorithms)
-   - Memory optimization (reduced allocations, better data layout)
-   - I/O optimization (caching, batching, async operations)
-   - Concurrency opportunities (parallelization, async processing)
-4. **Trade-off Analysis**: Performance vs readability vs maintainability
-5. **Benchmarking Strategy**: How to measure improvements
-</optimization_strategy>
-
-<expert_consultation>
-Get insights from specialized experts:
-- **Algorithm Specialist**: Better algorithmic approaches
-- **Memory Expert**: Memory usage patterns and optimization
-- **Concurrency Engineer**: Parallel processing opportunities
-- **System Architect**: Overall design optimization
-</expert_consultation>
-
-<output_format>
-<current_analysis>
-Performance characteristics of the current implementation
-- Time Complexity: O(?)
-- Space Complexity: O(?)
-- Key bottlenecks identified
-</current_analysis>
-
-<optimization_recommendations>
-**High Impact Optimizations:**
-1. [Most important optimization with code example]
-2. [Second most important...]
-
-**Implementation:**
-\`\`\`\${language}
-// Optimized code with performance annotations
+Example 1 - Algorithm Optimization:
+Original (O(n²)):
+\`\`\`python
+def find_duplicates(arr):
+    duplicates = []
+    for i in range(len(arr)):
+        for j in range(i+1, len(arr)):
+            if arr[i] == arr[j] and arr[i] not in duplicates:
+                duplicates.append(arr[i])
+    return duplicates
 \`\`\`
-</optimization_recommendations>
 
-<performance_impact>
-Expected performance improvements and trade-offs
-</performance_impact>
+Optimized (O(n)):
+\`\`\`python
+def find_duplicates(arr):
+    seen = set()
+    duplicates = set()
+    for item in arr:
+        if item in seen:
+            duplicates.add(item)
+        else:
+            seen.add(item)
+    return list(duplicates)
+\`\`\`
+**Performance Impact:** Reduced from O(n²) to O(n) time complexity, ~100x faster for large datasets
 
-<benchmarking>
-How to measure and validate the optimizations
-</benchmarking>
-</output_format>`,
+Example 2 - Memory Optimization:
+Original (loads entire file):
+\`\`\`python
+def process_large_file(filename):
+    with open(filename, 'r') as f:
+        lines = f.readlines()  # Loads entire file into memory
+    return [process_line(line) for line in lines]
+\`\`\`
+
+Optimized (streaming):
+\`\`\`python
+def process_large_file(filename):
+    with open(filename, 'r') as f:
+        for line in f:  # Process one line at a time
+            yield process_line(line.strip())
+\`\`\`
+**Memory Impact:** Constant memory usage regardless of file size
+
+### OPTIMIZATION STRATEGY ###
+Let's optimize this systematically:
+
+1. **Performance Profiling:** Identify current bottlenecks and resource usage patterns
+2. **Algorithmic Analysis:** Examine time complexity (Big O) and identify inefficient algorithms
+3. **Multiple Optimization Vectors:**
+   - **Algorithm Efficiency:** Better data structures and algorithms
+   - **Memory Optimization:** Reduce allocations and improve data layout
+   - **I/O Optimization:** Implement caching, batching, async operations
+   - **Concurrency Opportunities:** Identify parallelization potential
+4. **Trade-off Analysis:** Balance performance vs readability vs maintainability
+5. **Measurement Strategy:** Define metrics to validate improvements
+
+### OUTPUT FORMAT ###
+**CURRENT ANALYSIS:**
+- **Time Complexity:** O(?)
+- **Space Complexity:** O(?)
+- **Key Bottlenecks:** [Specific performance issues identified]
+- **Resource Usage:** [Memory, CPU, I/O characteristics]
+
+**OPTIMIZATION RECOMMENDATIONS:**
+
+**HIGH IMPACT OPTIMIZATIONS:**
+1. [Most impactful optimization with specific code example]
+2. [Second most important optimization]
+
+**OPTIMIZED IMPLEMENTATION:**
+\`\`\`\${language}
+// Optimized code with performance-focused comments
+// Include complexity analysis and key improvements
+\`\`\`
+
+**PERFORMANCE IMPACT:**
+- **Expected Improvement:** [Specific performance gains - e.g., "3x faster", "50% less memory"]
+- **Scalability:** [How performance changes with input size]
+- **Trade-offs:** [Any costs in readability, maintainability, or complexity]
+
+**BENCHMARKING GUIDE:**
+- [How to measure and validate the performance improvements]
+- [Specific metrics to track]
+- [Test scenarios to verify optimization effectiveness]`,
 	},
 	DOCUMENT: {
-		template: `You are a technical documentation expert specializing in \${language}. Generate a clear, complete Markdown document for the following code/system or description.
+		template: `You are a technical documentation expert specializing in creating clear, comprehensive, and maintainable documentation for \${language} projects.
 
-Context:
-- Language/Stack: \${language}
-- Subject to document:
-\n\n\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-\${userInput}
+### INSTRUCTION ###
+Generate complete technical documentation for the provided code, system, or project. Create well-structured Markdown documentation that serves as both reference and learning material.
 
-Requirements:
- - Output final documentation in Markdown only (no XML/HTML-esque wrapper tags, no commentary about what you will do).
-- Make it self-contained and skimmable with headings, lists, and code blocks.
-- Include, where applicable:
-	1. Title and short overview
-	2. Installation/setup or prerequisites
-  3. Usage with examples (fenced code blocks for \${language} when relevant)
-	4. API/parameters and return types
-	5. Configuration and environment variables
-	6. Implementation notes and design decisions
-	7. Common pitfalls and troubleshooting
-	8. Testing and maintenance guidance
-	9. Versioning/compatibility notes
-- Keep examples realistic. Prefer concise code illustrating typical and edge cases.
-- If parts are unknown from the context, omit them rather than inventing details.
+### CONTEXT ###
+Programming Language/Stack: \${language}
+Subject to Document: \${userInput}
 
-Deliverable:
-Return only the finished Markdown document, ready to paste into a README or docs site.`,
+### DOCUMENTATION EXAMPLES ###
+
+Example - Function Documentation:
+Input: Authentication function
+Output:
+\`\`\`markdown
+# User Authentication Module
+
+## Overview
+Secure user authentication system with JWT tokens and password hashing.
+
+## Installation
+\`\`\`bash
+npm install bcryptjs jsonwebtoken
+\`\`\`
+
+## Usage
+\`\`\`javascript
+const { authenticateUser, generateToken } = require('./auth');
+const token = await authenticateUser('user@example.com', 'password123');
+\`\`\`
+
+## API Reference
+### authenticateUser(email, password)
+- **Parameters:** email (string), password (string)
+- **Returns:** JWT token string or null
+- **Throws:** AuthenticationError for invalid credentials
+\`\`\`
+
+### DOCUMENTATION STRUCTURE ###
+Create comprehensive documentation following this structure:
+
+1. **Title and Overview:** What the code/system does and its main purpose
+2. **Installation/Setup:** Prerequisites, dependencies, and setup instructions
+3. **Quick Start:** Basic usage examples to get users started quickly
+4. **API Reference:** Detailed function/class/method documentation
+5. **Configuration:** Environment variables, config files, and settings
+6. **Examples:** Practical use cases with complete code samples
+7. **Best Practices:** Recommended usage patterns and conventions
+8. **Troubleshooting:** Common issues and their solutions
+9. **Contributing/Development:** How to modify, test, and maintain the code
+
+### OUTPUT FORMAT ###
+Provide complete Markdown documentation ready for immediate use. Structure with clear headings, practical examples, and comprehensive coverage of all important aspects.
+
+# [Project/Module Name]
+
+## Overview
+[Clear description of purpose and functionality]
+
+## Installation
+\`\`\`bash
+[Setup commands and prerequisites]
+\`\`\`
+
+## Quick Start
+\`\`\`\${language}
+[Basic usage example]
+\`\`\`
+
+## API Reference
+[Detailed documentation of functions, classes, parameters, return values]
+
+## Configuration
+[Environment variables, settings, configuration options]
+
+## Examples
+[Practical use cases with complete working examples]
+
+## Best Practices
+[Recommended patterns and conventions]
+
+## Troubleshooting
+[Common issues and solutions]
+
+## Development
+[Testing, contributing, and maintenance information]`,
 	},
 	TEST: {
-		template: `You are a testing expert with deep knowledge of \${language} testing frameworks, methodologies, and best practices including unit testing, integration testing, and test-driven development.
+		template: `You are a testing expert with comprehensive knowledge of \${language} testing frameworks, methodologies, and quality assurance best practices.
 
-<testing_context>
-Language: \${language}
-Code/Functionality to test: \${userInput}
-</testing_context>
+### INSTRUCTION ###
+Create a complete test suite for the provided code/functionality. Include unit tests, integration tests, and edge case coverage with clear, maintainable test code.
 
-<testing_strategy>
-Develop comprehensive testing approach:
+### CONTEXT ###
+Programming Language: \${language}
+Code/Functionality to Test: \${userInput}
 
-1. **Test Planning**: Identify what needs to be tested and test categories
-2. **Test Design**: Create test cases covering:
-   - Happy path scenarios (normal operation)
-   - Edge cases and boundary conditions
-   - Error conditions and exception handling
-   - Performance and stress scenarios
-3. **Test Implementation**: Write maintainable, readable tests
-4. **Test Organization**: Structure tests logically with clear naming
-5. **Coverage Analysis**: Ensure adequate code coverage
-</testing_strategy>
+### TESTING EXAMPLES ###
 
-<testing_expert_consultation>
-- **Unit Test Specialist**: Individual component testing
-- **Integration Expert**: System interaction testing  
-- **QA Engineer**: User scenario and acceptance testing
-- **Performance Tester**: Load and stress testing
-</testing_expert_consultation>
+Example 1 - Function Testing:
+Code to test: \`add(a, b)\` function
+Test Suite:
+\`\`\`python
+import pytest
+from calculator import add
 
-<output_format>
-<test_plan>
-## Test Strategy
+class TestAddFunction:
+    def test_add_positive_numbers(self):
+        assert add(2, 3) == 5
+        assert add(10, 15) == 25
+    
+    def test_add_negative_numbers(self):
+        assert add(-2, -3) == -5
+        assert add(-10, 5) == -5
+    
+    def test_add_zero(self):
+        assert add(0, 5) == 5
+        assert add(5, 0) == 5
+        assert add(0, 0) == 0
+    
+    def test_add_edge_cases(self):
+        assert add(float('inf'), 1) == float('inf')
+        assert add(1.1, 2.2) == pytest.approx(3.3)
+    
+    def test_add_type_errors(self):
+        with pytest.raises(TypeError):
+            add("string", 5)
+        with pytest.raises(TypeError):
+            add(None, 5)
+\`\`\`
 
+Example 2 - API Testing:
+\`\`\`python
+import requests
+import pytest
+
+class TestUserAPI:
+    def test_create_user_success(self):
+        response = requests.post('/api/users', json={
+            'name': 'John Doe',
+            'email': 'john@example.com'
+        })
+        assert response.status_code == 201
+        assert response.json()['email'] == 'john@example.com'
+    
+    def test_create_user_invalid_email(self):
+        response = requests.post('/api/users', json={
+            'name': 'John Doe',
+            'email': 'invalid-email'
+        })
+        assert response.status_code == 400
+\`\`\`
+
+### TESTING STRATEGY ###
+Let's develop comprehensive tests step by step:
+
+1. **Test Planning:** Identify all functions, methods, and behaviors that need testing
+2. **Test Categories:**
+   - **Unit Tests:** Individual component testing in isolation
+   - **Integration Tests:** Testing component interactions
+   - **Edge Case Tests:** Boundary conditions and unusual inputs
+   - **Error Handling Tests:** Exception scenarios and recovery
+3. **Test Data Design:** Create representative test datasets and scenarios
+4. **Assertion Strategy:** Choose appropriate validation methods
+5. **Test Organization:** Structure tests logically with clear naming conventions
+
+### TEST FRAMEWORK SELECTION ###
+For \${language}, recommended frameworks:
+- **Python:** pytest, unittest
+- **JavaScript:** Jest, Mocha + Chai
+- **Java:** JUnit 5, TestNG
+- **C#:** NUnit, xUnit
+- **Go:** built-in testing package
+- **Rust:** built-in test framework
+
+### OUTPUT FORMAT ###
+**TEST STRATEGY:**
 **Test Categories:**
-- Unit Tests: [Component-level testing]
+- Unit Tests: [Individual component testing]
 - Integration Tests: [System interaction testing]
 - Edge Cases: [Boundary and error conditions]
-</test_plan>
 
-<test_implementation>
-### Unit Tests
+**TEST IMPLEMENTATION:**
 
+**Unit Tests:**
 \`\`\`\${language}
-// Comprehensive test suite with clear test names
+// Comprehensive unit test suite with descriptive test names
 // Test happy path, edge cases, and error conditions
 \`\`\`
 
-### Integration Tests
-
+**Integration Tests:**
 \`\`\`\${language}
 // Tests for component interactions and system behavior
 \`\`\`
 
-### Test Data and Mocks
-
+**Test Data and Setup:**
 \`\`\`\${language}
-// Test data setup and mock configurations
+// Test data fixtures, mocks, and setup/teardown code
 \`\`\`
-</test_implementation>
 
-<test_cases>
-### Test Case Coverage
-
-**Happy Path:**
-- [Normal operation scenarios]
+**TEST COVERAGE ANALYSIS:**
+**Happy Path Scenarios:**
+- [Normal operation test cases]
 
 **Edge Cases:**
 - [Boundary conditions and special inputs]
+- [Large/small values, empty inputs, null values]
 
 **Error Handling:**
 - [Exception scenarios and error recovery]
-</test_cases>
+- [Invalid inputs and malformed data]
 
-<testing_guidelines>
-### Best Practices
-- Test naming conventions
-- Test data management
-- Assertion strategies
-- Maintenance considerations
-</testing_guidelines>
-</output_format>`,
+**TESTING BEST PRACTICES:**
+- **Naming:** Use descriptive test names that explain what is being tested
+- **Isolation:** Each test should be independent and not rely on others
+- **Assertions:** Use specific assertions that clearly indicate what failed
+- **Test Data:** Use realistic data that represents actual usage scenarios
+- **Maintenance:** Keep tests simple and update them when code changes`,
 	},
 } as const
 
@@ -403,12 +615,12 @@ export const supportPrompt = {
 	// Helper method to get prompt description
 	getDescription: (type: SupportPromptType): string => {
 		const descriptions: Record<SupportPromptType, string> = {
-			ENHANCE: "Improve and optimize prompts using advanced prompt engineering techniques",
-			ANALYZE: "Comprehensive code analysis from multiple expert perspectives", 
-			DEBUG: "Systematic debugging with root cause analysis and solutions",
-			OPTIMIZE: "Performance optimization focusing on algorithms and efficiency",
-			DOCUMENT: "Generate comprehensive technical documentation",
-			TEST: "Create thorough test suites with multiple testing strategies"
+			ENHANCE: "Transform basic prompts into powerful, structured instructions using advanced prompt engineering techniques",
+			ANALYZE: "Get comprehensive code analysis covering security, performance, architecture, and best practices", 
+			DEBUG: "Systematic debugging with root cause analysis, step-by-step solutions, and prevention strategies",
+			OPTIMIZE: "Improve performance, algorithms, and resource efficiency with measurable improvements",
+			DOCUMENT: "Generate complete technical documentation with examples, API references, and best practices",
+			TEST: "Create thorough test suites with unit tests, integration tests, and comprehensive edge case coverage"
 		}
 		return descriptions[type]
 	},

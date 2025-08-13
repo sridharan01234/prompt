@@ -499,12 +499,12 @@ export default function PromptPlaygroundModern() {
   const [promptType, setPromptType] = useState<SupportPromptType>('ENHANCE')
   const promptTypeOptions: { value: SupportPromptType; label: string; icon: string; description: string }[] = useMemo(
     () => [
-      { value: 'ENHANCE', label: 'Enhance', icon: '✨', description: 'Improve and refine your prompt' },
-      { value: 'ANALYZE', label: 'Analyze', icon: '🔍', description: 'Deep analysis and insights' },
-      { value: 'DEBUG', label: 'Debug', icon: '🐛', description: 'Find and fix issues' },
-      { value: 'OPTIMIZE', label: 'Optimize', icon: '⚡', description: 'Performance improvements' },
-      { value: 'DOCUMENT', label: 'Document', icon: '📝', description: 'Create documentation' },
-      { value: 'TEST', label: 'Test', icon: '🧪', description: 'Generate test cases' }
+      { value: 'ENHANCE', label: 'Enhance', icon: '✨', description: 'Transform basic prompts into powerful, structured instructions' },
+      { value: 'ANALYZE', label: 'Analyze', icon: '🔍', description: 'Get comprehensive code review with security and performance insights' },
+      { value: 'DEBUG', label: 'Debug', icon: '🐛', description: 'Systematic problem-solving with root cause analysis' },
+      { value: 'OPTIMIZE', label: 'Optimize', icon: '⚡', description: 'Improve performance, algorithms, and resource efficiency' },
+      { value: 'DOCUMENT', label: 'Document', icon: '�', description: 'Generate complete technical documentation with examples' },
+      { value: 'TEST', label: 'Test', icon: '🧪', description: 'Create comprehensive test suites with edge case coverage' }
     ],
     []
   )
@@ -585,6 +585,18 @@ export default function PromptPlaygroundModern() {
     setTimeout(() => setCopied(false), 2000)
   }
 
+  const getPlaceholderText = (type: SupportPromptType): string => {
+    const placeholders = {
+      ENHANCE: 'Enter a basic prompt to enhance, e.g., "Write a function to sort data" or "Create a login form"',
+      ANALYZE: 'Paste code you want analyzed for security, performance, and quality issues',
+      DEBUG: 'Describe the error or issue you\'re experiencing, include error messages and relevant code',
+      OPTIMIZE: 'Share code or describe the system you want to optimize for better performance',
+      DOCUMENT: 'Paste code, function, or describe the project you want to document',
+      TEST: 'Paste the code or function you want to create comprehensive tests for'
+    }
+    return placeholders[type]
+  }
+
   const charCount = userText.length
   const responseSubtitle = useMemo(() => (
     promptType === 'DOCUMENT' ? 'Your document' : 'Your enhanced prompt'
@@ -628,7 +640,7 @@ export default function PromptPlaygroundModern() {
             </h1>
           </div>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Create, refine, and perfect your prompts with AI assistance. Transform your ideas into powerful, effective prompts.
+            Transform your ideas into powerful prompts using proven prompt engineering techniques. Get enhanced prompts, code analysis, debugging help, performance optimization, documentation, and comprehensive test suites.
           </p>
           
           {/* Feature badges */}
@@ -798,7 +810,7 @@ export default function PromptPlaygroundModern() {
                     value={userText}
                     onChange={(e) => setUserText(e.target.value)}
                     className="w-full h-48 resize-none rounded-xl border-2 border-gray-200 bg-white px-4 py-4 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none transition-all"
-                    placeholder="Describe what you want to accomplish. Be as specific as possible..."
+                    placeholder={getPlaceholderText(promptType)}
                   />
                   <div className="absolute bottom-3 right-3 text-xs text-gray-400">
                     Press Shift + Enter for new line
@@ -948,7 +960,7 @@ export default function PromptPlaygroundModern() {
                           </svg>
                         </div>
                         <p className="text-lg font-medium text-gray-600 mb-2">Ready to enhance your prompt</p>
-                        <p className="text-gray-500">Enter your prompt above and click Generate with AI to get started</p>
+                        <p className="text-gray-500">Enter your prompt above and click "Generate with AI" to get started</p>
                       </div>
                     </div>
                   )}

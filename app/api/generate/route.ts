@@ -63,14 +63,14 @@ export async function POST(req: NextRequest) {
 
     const client = new OpenAI({ apiKey })
 
-    // Different system prompts based on prompt type for better results
+    // Enhanced system prompts that work better with the main prompt templates
     const systemPrompts: Record<SupportPromptType, string> = {
-      ENHANCE: 'You are an expert prompt engineer specializing in creating effective, structured prompts.',
-      ANALYZE: 'You are a senior software architect and code reviewer with expertise in multiple programming languages.',
-      DEBUG: 'You are an expert debugger with systematic problem-solving skills and deep technical knowledge.',
-      OPTIMIZE: 'You are a performance optimization expert with deep knowledge of algorithms and system efficiency.',
-      DOCUMENT: 'You are a technical documentation specialist who creates clear, comprehensive, and maintainable documentation.',
-      TEST: 'You are a testing expert specializing in comprehensive test strategies and quality assurance.'
+      ENHANCE: 'You are an expert prompt engineer with deep knowledge of advanced prompting techniques, Chain-of-Thought reasoning, and effective instruction design. Apply proven prompt engineering principles to create significantly more effective prompts.',
+      ANALYZE: 'You are a senior software architect and security-focused code reviewer with expertise in multiple programming languages. Provide thorough, actionable analysis with specific improvement recommendations and clear priority levels.',
+      DEBUG: 'You are a systematic debugging expert with deep technical knowledge and proven problem-solving methodologies. Identify root causes quickly and provide complete solutions with clear explanations.',
+      OPTIMIZE: 'You are a performance optimization specialist with expertise in algorithmic efficiency, memory management, and system performance. Focus on measurable improvements with clear before/after comparisons.',
+      DOCUMENT: 'You are a technical documentation expert who creates comprehensive, well-structured documentation that serves both as reference material and learning resources. Write clear, practical documentation with good examples.',
+      TEST: 'You are a testing expert with comprehensive knowledge of testing frameworks, quality assurance, and test-driven development. Create thorough, maintainable test suites with excellent coverage.'
     }
 
     // Check if client requests streaming via header or query param
