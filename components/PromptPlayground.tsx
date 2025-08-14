@@ -413,9 +413,9 @@ function ModernButton({
 
 export default function PromptPlayground() {
   const { user, isAuthenticated, signOut } = useAuth()
-  const [userText, setUserText] = useState<string>('Write a function to sort an array efficiently')
+  const [userText, setUserText] = useState<string>('Help me write a professional email to request a meeting')
   const [error, setError] = useState<string>('')
-  const [model, setModel] = useState<string>('')
+  const [model, setModel] = useState<string>('gpt-4o-mini')
   const [models, setModels] = useState<string[]>([])
   const [premiumModels, setPremiumModels] = useState<string[]>([])
   const [limitedModels, setLimitedModels] = useState<string[]>([])
@@ -476,9 +476,10 @@ export default function PromptPlayground() {
   const inputRef = useRef<HTMLTextAreaElement | null>(null)
 
   // Programming language selection
-  const [language, setLanguage] = useState<string>('TypeScript')
+  const [language, setLanguage] = useState<string>('General')
   const languageOptions = useMemo(
     () => [
+      { value: 'General', label: 'General', icon: '💬', description: 'General queries and conversations' },
       { value: 'TypeScript', label: 'TypeScript', icon: '🔷', description: 'Typed JavaScript superset' },
       { value: 'JavaScript', label: 'JavaScript', icon: '💛', description: 'Dynamic web programming language' },
       { value: 'Python', label: 'Python', icon: '🐍', description: 'High-level programming language' },
@@ -522,9 +523,13 @@ export default function PromptPlayground() {
         setLimitedModels(data.limited || [])
         setPremiumModels(data.premium || [])
         
-        // Set default model
-        if (!model && data.limited?.[0]) {
-          setModel(data.limited[0])
+        // Set default model to gpt-4o-mini if available, otherwise use first limited model
+        if (!model || model === '') {
+          if (data.limited?.includes('gpt-4o-mini')) {
+            setModel('gpt-4o-mini')
+          } else if (data.limited?.[0]) {
+            setModel(data.limited[0])
+          }
         }
       } catch (err) {
         setModelsError((err as Error).message)
@@ -716,7 +721,7 @@ export default function PromptPlayground() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-gray-700 mb-2">Programming language</label>
+              <label className="block text-xs font-semibold text-gray-700 mb-2">Context/Language</label>
               <ModernSelect
                 value={language}
                 onChange={setLanguage}
