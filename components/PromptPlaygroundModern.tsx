@@ -960,7 +960,7 @@ export default function PromptPlaygroundModern() {
                           </svg>
                         </div>
                         <p className="text-lg font-medium text-gray-600 mb-2">Ready to enhance your prompt</p>
-                        <p className="text-gray-500">Enter your prompt above and click "Generate with AI" to get started</p>
+                        <p className="text-gray-500">Enter your prompt above and click Generate with AI to get started</p>
                       </div>
                     </div>
                   )}
