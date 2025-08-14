@@ -606,7 +606,7 @@ export default function PromptPlayground() {
   const [activeMobileTab, setActiveMobileTab] = useState<'controls' | 'response'>('controls')
 
   return (
-    <>
+    <div className="h-full flex flex-col">
       <GoogleOneTapSignIn />
       
       {/* Copy notification */}
@@ -629,7 +629,7 @@ export default function PromptPlayground() {
       </AnimatePresence>
 
       {/* Mobile tabs */}
-      <div className="md:hidden mb-4">
+      <div className="md:hidden mb-3 flex-shrink-0">
         <div className="flex rounded-lg border border-gray-200 bg-gray-50 p-1">
           <button
             className={`flex-1 rounded-md px-3 py-2 text-sm font-medium ${
@@ -654,25 +654,25 @@ export default function PromptPlayground() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4 min-h-0">
         {/* Left column - Input */}
         <motion.section 
-          className={`card ${activeMobileTab === 'controls' ? 'block' : 'hidden md:block'}`}
+          className={`bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex flex-col min-h-0 ${activeMobileTab === 'controls' ? 'block' : 'hidden md:flex'}`}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
           {/* Header */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-4 flex-shrink-0">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                 </svg>
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-gray-900">Playground</h2>
-                <p className="text-sm text-gray-600">Describe your task, get refined prompts</p>
+                <h2 className="text-base font-semibold text-gray-900">Playground</h2>
+                <p className="text-xs text-gray-600">Describe your task, get refined prompts</p>
               </div>
             </div>
             
@@ -705,9 +705,9 @@ export default function PromptPlayground() {
           </div>
 
           {/* Controls */}
-          <div className="grid grid-cols-1 gap-6 mb-8">
+          <div className="grid grid-cols-1 gap-3 mb-4 flex-shrink-0">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-3">Prompt type</label>
+              <label className="block text-xs font-semibold text-gray-700 mb-2">Prompt type</label>
               <ModernSelect
                 value={promptType}
                 onChange={(value: string) => setPromptType(value as SupportPromptType)}
@@ -716,7 +716,7 @@ export default function PromptPlayground() {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-3">Programming language</label>
+              <label className="block text-xs font-semibold text-gray-700 mb-2">Programming language</label>
               <ModernSelect
                 value={language}
                 onChange={setLanguage}
@@ -726,7 +726,7 @@ export default function PromptPlayground() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">OpenAI model</label>
+              <label className="block text-xs font-medium text-gray-700 mb-2">OpenAI model</label>
               <ModelDropdown
                 value={model}
                 onChange={setModel}
@@ -737,7 +737,7 @@ export default function PromptPlayground() {
                 error={modelsError}
               />
               {!isAuthenticated && premiumModels.includes(model) && (
-                <p className="mt-2 text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">
+                <p className="mt-1 text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-md px-2 py-1">
                   🔒 Premium model selected. Sign in to use it, or pick a free model.
                 </p>
               )}
@@ -745,9 +745,9 @@ export default function PromptPlayground() {
           </div>
 
           {/* Input area */}
-          <div className="panel mb-4">
-            <div className="mb-3 flex items-center justify-between">
-              <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 flex-1 flex flex-col min-h-0">
+            <div className="mb-2 flex items-center justify-between flex-shrink-0">
+              <label className="text-xs font-medium text-gray-700 flex items-center gap-2">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
                 </svg>
@@ -761,80 +761,80 @@ export default function PromptPlayground() {
               ref={inputRef}
               value={userText}
               onChange={(e) => setUserText(e.target.value)}
-              className="w-full h-40 resize-none"
+              className="w-full flex-1 resize-none text-sm"
               placeholder={getPlaceholderText(promptType)}
             />
-          </div>
-
-          {/* Generate button */}
-          <div className="flex gap-3">
-            <motion.button
-              onClick={loading ? onCancelRequest : handleGenerate}
-              disabled={!userText.trim() || !model}
-              className={`btn-primary flex-1 flex items-center justify-center gap-2 ${
-                loading ? 'bg-red-500 hover:bg-red-600' : ''
-              }`}
-              whileTap={{ scale: 0.98 }}
-            >
-              {loading ? (
-                <>
-                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
-                  Cancel
-                </>
-              ) : (
-                <>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                  Generate with AI
-                </>
-              )}
-            </motion.button>
-            <motion.button
-              onClick={() => {
-                setUserText('')
-                setAiOutput('')
-                setError('')
-                resetStream()
-              }}
-              className="btn-secondary"
-              whileTap={{ scale: 0.98 }}
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-            </motion.button>
+          
+            {/* Generate button */}
+            <div className="flex gap-2 mt-3 flex-shrink-0">
+              <motion.button
+                onClick={loading ? onCancelRequest : handleGenerate}
+                disabled={!userText.trim() || !model}
+                className={`btn-primary flex-1 flex items-center justify-center gap-2 text-sm py-2 ${
+                  loading ? 'bg-red-500 hover:bg-red-600' : ''
+                }`}
+                whileTap={{ scale: 0.98 }}
+              >
+                {loading ? (
+                    <>
+                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    Cancel
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    Generate with AI
+                  </>
+                )}
+              </motion.button>
+              <motion.button
+                onClick={() => {
+                  setUserText('')
+                  setAiOutput('')
+                  setError('')
+                  resetStream()
+                }}
+                className="btn-secondary text-sm py-2 px-3"
+                whileTap={{ scale: 0.98 }}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              </motion.button>
+            </div>
           </div>
         </motion.section>
 
-  {/* Right column - Output */}
+        {/* Right column - Output */}
         <motion.section 
-          className={`card ${activeMobileTab === 'response' ? 'block' : 'hidden md:block'}`}
+          className={`bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex flex-col min-h-0 ${activeMobileTab === 'response' ? 'flex' : 'hidden md:flex'}`}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.1 }}
         >
           {/* Header */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-4 flex-shrink-0">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-gray-900">Response</h2>
-                <p className="text-sm text-gray-600">{responseSubtitle}</p>
+                <h2 className="text-base font-semibold text-gray-900">Response</h2>
+                <p className="text-xs text-gray-600">{responseSubtitle}</p>
               </div>
             </div>
             
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setWrapOutput((w) => !w)}
-                className="btn-secondary px-3 py-2 text-sm"
+                className="btn-secondary px-2 py-1 text-xs"
                 aria-pressed={wrapOutput}
                 title="Toggle text wrapping"
               >
@@ -844,16 +844,16 @@ export default function PromptPlayground() {
                 <>
                   <button
                     onClick={() => onCopy(aiOutput)}
-                    className="btn-secondary flex items-center gap-2"
+                    className="btn-secondary flex items-center gap-1 text-xs px-2 py-1"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                     </svg>
                     Copy
                   </button>
                   <button
                     onClick={() => { setAiOutput(''); setError(''); resetStream(); }}
-                    className="btn-secondary px-3 py-2 text-sm"
+                    className="btn-secondary px-2 py-1 text-xs"
                     title="Clear response"
                   >
                     Clear
@@ -863,39 +863,39 @@ export default function PromptPlayground() {
             </div>
           </div>
 
-          {/* Content: fixed-size, scrollable response area */}
-          <div className="panel relative h-[420px] md:h-[520px] overflow-hidden flex flex-col">
-            <div className="flex-1 overflow-y-auto pr-1" ref={responseScrollRef}>
+          {/* Content: flexible response area that fills available space */}
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 flex-1 flex flex-col min-h-0">
+            <div className="flex-1 overflow-y-auto text-sm" ref={responseScrollRef}>
               {error && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-3">
                   <div className="flex">
-                    <svg className="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-4 h-4 text-red-400" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                     </svg>
-                    <div className="ml-3">
-                      <h3 className="text-sm font-medium text-red-800">Error</h3>
-                      <p className="text-sm text-red-700">{error}</p>
+                    <div className="ml-2">
+                      <h3 className="text-xs font-medium text-red-800">Error</h3>
+                      <p className="text-xs text-red-700">{error}</p>
                     </div>
                   </div>
                 </div>
               )}
 
               {loading && !streamedContent && (
-                <div className="flex items-center justify-center h-40">
+                <div className="flex items-center justify-center flex-1">
                   <div className="flex items-center gap-3">
-                    <div className="animate-spin w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full"></div>
-                    <span className="text-gray-600">Generating response...</span>
+                    <div className="animate-spin w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+                    <span className="text-gray-600 text-sm">Generating response...</span>
                   </div>
                 </div>
               )}
 
               {(aiOutput || streamedContent) && (
-                <div className="space-y-4">
-                  <pre className={`${wrapOutput ? 'whitespace-pre-wrap break-words' : 'whitespace-pre'} text-sm leading-relaxed text-gray-800`}>
+                <div className="space-y-3">
+                  <pre className={`${wrapOutput ? 'whitespace-pre-wrap break-words' : 'whitespace-pre'} text-xs leading-relaxed text-gray-800`}>
                     {aiOutput || streamedContent}
                   </pre>
                   {loading && streamedContent && (
-                    <div className="flex items-center gap-2 text-sm text-blue-600">
+                    <div className="flex items-center gap-2 text-xs text-blue-600">
                       <div className="animate-pulse w-2 h-2 bg-blue-500 rounded-full"></div>
                       Streaming...
                     </div>
@@ -904,12 +904,12 @@ export default function PromptPlayground() {
               )}
 
               {!aiOutput && !streamedContent && !loading && !error && (
-                <div className="flex items-center justify-center h-40 text-gray-500">
+                <div className="flex items-center justify-center flex-1 text-gray-500">
                   <div className="text-center">
-                    <svg className="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-10 h-10 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
-                    <p className="text-sm">{responseSubtitle} will appear here</p>
+                    <p className="text-xs">{responseSubtitle} will appear here</p>
                   </div>
                 </div>
               )}
@@ -917,6 +917,6 @@ export default function PromptPlayground() {
           </div>
         </motion.section>
       </div>
-    </>
+    </div>
   )
 }

@@ -4,18 +4,18 @@ import { motion } from 'framer-motion'
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
       {/* Clean, modern header */}
-      <header className="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
+      <header className="flex-shrink-0 bg-white border-b border-gray-200 shadow-sm">
         <div className="container mx-auto">
-          <div className="flex h-16 items-center justify-between">
+          <div className="flex h-14 items-center justify-between">
             <motion.div 
               className="flex items-center gap-3"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+              <div className="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-semibold text-sm">P</span>
               </div>
               <div>
@@ -30,7 +30,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               transition={{ duration: 0.3, delay: 0.1 }}
             >
               <a 
-                href="https://github.com/example/prompt-enhancer" 
+                href="https://github.com/sridharan01234/prompt" 
                 className="text-gray-600 hover:text-gray-900 transition-colors flex items-center gap-2 text-sm font-medium"
               >
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -43,17 +43,17 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      <div className="container mx-auto py-8">
+      <div className="flex-1 flex flex-col min-h-0 container mx-auto py-4">
         <motion.header
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className="mb-8 text-center"
+          className="flex-shrink-0 mb-4 text-center"
         >
-          <h1 className="text-3xl font-semibold text-gray-900 mb-3">
+          <h1 className="text-2xl font-semibold text-gray-900 mb-2">
             Playground
           </h1>
-          <p className="text-gray-600 text-lg max-w-2xl mx-auto mb-6">
+          <p className="text-gray-600 text-base max-w-2xl mx-auto mb-4">
             Create, refine, and perfect your prompts with AI assistance. Transform your ideas into powerful, 
             effective prompts.
           </p>
@@ -73,7 +73,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         </motion.header>
 
-        <main role="main" aria-label="Prompt Playground">
+        <main role="main" aria-label="Prompt Playground" className="flex-1 min-h-0">
           {children}
         </main>
       </div>
