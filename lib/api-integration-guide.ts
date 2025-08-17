@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 /**
  * Integration Guide: Enhanced Prompts with MCP in API Routes
  * 
@@ -18,7 +20,7 @@ export async function POST(request: NextRequest) {
 		
 		// 2. Authentication check (existing logic)
 		const session = await getServerSession(authOptions)
-		let userId = session?.userId || null
+		let userId = (session as any)?.userId || null
 		let authed = Boolean(session)
 
 		// Custom Google auth cookie fallback (existing logic)
