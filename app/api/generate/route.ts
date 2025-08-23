@@ -5,6 +5,53 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { isPremiumModel, isLimitedModel } from '@/lib/models'
 import { checkAndConsumeTokens } from '@/lib/quota'
+import { sridharanProfile, formatExperienceForProposal } from '@/lib/user-profile'
+
+// Enhanced research function for Upwork proposals
+async function enhanceWithWebResearch(jobDescription: string) {
+  try {
+    // Research prompt engineering techniques
+    const promptResearch = await fetch('http://localhost:3000/api/mcp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        tool: 'mcp_firecrawl_firecrawl_search',
+        params: {
+          query: 'prompt engineering techniques best practices',
+          limit: 3,
+          scrapeOptions: { formats: ['markdown'], onlyMainContent: true }
+        }
+      })
+    }).then(res => res.json()).catch(() => ({ results: [] }))
+
+    // Research Upwork proposal best practices  
+    const upworkResearch = await fetch('http://localhost:3000/api/mcp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        tool: 'mcp_firecrawl_firecrawl_search',
+        params: {
+          query: 'Upwork proposal writing tips winning strategies',
+          limit: 3,
+          scrapeOptions: { formats: ['markdown'], onlyMainContent: true }
+        }
+      })
+    }).then(res => res.json()).catch(() => ({ results: [] }))
+
+    // Extract key insights from research
+    const promptTechniques = promptResearch.results?.map((r: any) => r.content).join('\n') || ''
+    const upworkStrategies = upworkResearch.results?.map((r: any) => r.content).join('\n') || ''
+
+    return {
+      promptTechniques: promptTechniques.substring(0, 2000), // Limit content
+      upworkStrategies: upworkStrategies.substring(0, 2000),
+      jobDescription
+    }
+  } catch (error) {
+    console.error('Research error:', error)
+    return { promptTechniques: '', upworkStrategies: '', jobDescription }
+  }
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -41,23 +88,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unsupported model.' }, { status: 400 })
     }
 
-    const prompt = supportPrompt.create(type, params)
-
     const apiKey = process.env.OPENAI_API_KEY || process.env.NEXT_PUBLIC_OPENAI_API_KEY
     if (!apiKey) {
       return NextResponse.json(
         { error: 'OPENAI_API_KEY is missing. Create web/.env.local with OPENAI_API_KEY=your_key and restart dev server.' },
         { status: 500 }
-      )
-    }
-
-    // Estimate tokens (simple heuristic: ~4 chars/token)
-    const estimatedTokens = Math.ceil((prompt?.length || 0) / 4) + 512 // account for output
-    const quota = await checkAndConsumeTokens(userId, model, estimatedTokens)
-    if (!quota.allowed) {
-      return NextResponse.json(
-        { error: `Daily token limit reached for ${isPremiumModel(model) ? 'premium' : 'free'} tier. Remaining: ${quota.remaining}/${quota.limit}` },
-        { status: 429 }
       )
     }
 
@@ -70,10 +105,41 @@ export async function POST(req: NextRequest) {
       DEBUG: 'You are a systematic debugging expert with deep technical knowledge and proven problem-solving methodologies. Identify root causes quickly and provide complete solutions with clear explanations.',
       OPTIMIZE: 'You are a performance optimization specialist with expertise in algorithmic efficiency, memory management, and system performance. Focus on measurable improvements with clear before/after comparisons.',
       DOCUMENT: 'You are a technical documentation expert who creates comprehensive, well-structured documentation that serves both as reference material and learning resources. Write clear, practical documentation with good examples.',
-      TEST: 'You are a testing expert with comprehensive knowledge of testing frameworks, quality assurance, and test-driven development. Create thorough, maintainable test suites with excellent coverage.'
+      TEST: 'You are a testing expert with comprehensive knowledge of testing frameworks, quality assurance, and test-driven development. Create thorough, maintainable test suites with excellent coverage.',
+      UPWORK: 'You are an elite Upwork proposal specialist with a proven track record of winning high-value contracts. You understand client psychology, freelancer positioning, and the competitive dynamics of the platform. Create proposals that get noticed, build trust, and secure interviews.'
     }
 
-    // Check if client requests streaming via header or query param
+    // Enhanced processing for UPWORK type with web research
+    let enhancedParams = params
+    if (type === 'UPWORK' && params.userInput) {
+      const researchData = await enhanceWithWebResearch(params.userInput)
+      const profileInfo = formatExperienceForProposal(params.language || 'Web Development')
+      
+      enhancedParams = {
+        ...params,
+        userInput: params.userInput,
+        language: params.language || 'Web Development',
+        promptTechniques: researchData.promptTechniques,
+        upworkStrategies: researchData.upworkStrategies,
+        profileInfo: profileInfo,
+        freelancerName: sridharanProfile.name,
+        freelancerTitle: sridharanProfile.title,
+        portfolioUrl: 'https://portfolio-sridharan01234s-projects.vercel.app',
+        researchEnhanced: true
+      }
+    }
+
+    const prompt = supportPrompt.create(type, enhancedParams)
+
+    // Estimate tokens (simple heuristic: ~4 chars/token)
+    const estimatedTokens = Math.ceil((prompt?.length || 0) / 4) + 512 // account for output
+    const quota = await checkAndConsumeTokens(userId, model, estimatedTokens)
+    if (!quota.allowed) {
+      return NextResponse.json(
+        { error: `Daily token limit reached for ${isPremiumModel(model) ? 'premium' : 'free'} tier. Remaining: ${quota.remaining}/${quota.limit}` },
+        { status: 429 }
+      )
+    }
     const isStreamingRequested = req.headers.get('accept') === 'text/stream' || 
                                 req.nextUrl.searchParams.get('stream') === 'true'
 

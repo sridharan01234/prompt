@@ -1,26 +1,56 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname()
+  
   return (
-    <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Clean, modern header */}
-      <header className="flex-shrink-0 bg-white border-b border-gray-200 shadow-sm">
+      <header className="flex-shrink-0 bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50">
         <div className="container mx-auto">
           <div className="flex h-14 items-center justify-between">
             <motion.div 
-              className="flex items-center gap-3"
+              className="flex items-center gap-6"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <div className="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-semibold text-sm">P</span>
+              <div className="flex items-center gap-3">
+                <div className="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center">
+                  <span className="text-white font-semibold text-sm">P</span>
+                </div>
+                <div>
+                  <span className="text-lg font-semibold text-gray-900">AI Tools</span>
+                </div>
               </div>
-              <div>
-                <span className="text-lg font-semibold text-gray-900">Prompt Enhancer</span>
-              </div>
+              
+              {/* Navigation tabs */}
+              <nav className="flex items-center gap-1">
+                <Link
+                  href="/"
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    pathname === '/' 
+                      ? 'bg-blue-100 text-blue-700' 
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  }`}
+                >
+                  ✨ Prompt Enhancer
+                </Link>
+                <Link
+                  href="/upwork"
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    pathname === '/upwork' 
+                      ? 'bg-green-100 text-green-700' 
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  }`}
+                >
+                  💼 Upwork Proposals
+                </Link>
+              </nav>
             </motion.div>
             
             <motion.nav 
@@ -43,37 +73,24 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      <div className="flex-1 flex flex-col min-h-0 container mx-auto py-4">
-        <motion.header
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="flex-shrink-0 mb-4 text-center"
-        >
-          <h1 className="text-2xl font-semibold text-gray-900 mb-2">
-            Playground
-          </h1>
-          <p className="text-gray-600 text-base max-w-2xl mx-auto mb-4">
-            Create, refine, and perfect your prompts with AI assistance. Transform your ideas into powerful, 
-            effective prompts.
-          </p>
-          <div className="flex justify-center items-center gap-6 text-sm text-gray-500">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-              AI-Powered Enhancement
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              Real-time Preview
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-              Multiple Models
-            </div>
-          </div>
-        </motion.header>
+      <div className="flex-1 container mx-auto py-4 px-4">
+        {pathname === '/' && (
+          <motion.header
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="text-center mb-8"
+          >
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent mb-4">
+              Prompt Enhancer
+            </h1>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Transform your ideas into powerful prompts using proven prompt engineering techniques
+            </p>
+          </motion.header>
+        )}
 
-        <main role="main" aria-label="Prompt Playground" className="flex-1 min-h-0">
+        <main className="w-full">
           {children}
         </main>
       </div>

@@ -495,6 +495,25 @@ export default function PromptPlaygroundModern() {
     []
   )
 
+  // Upwork specialization options
+  const upworkSpecializationOptions = useMemo(
+    () => [
+      { value: 'Web Development', label: 'Web Development', icon: '🌐', description: 'Frontend, backend, and full-stack development' },
+      { value: 'Mobile Development', label: 'Mobile Development', icon: '📱', description: 'iOS, Android, and cross-platform apps' },
+      { value: 'Design & Creative', label: 'Design & Creative', icon: '🎨', description: 'UI/UX, graphic design, branding' },
+      { value: 'Writing & Content', label: 'Writing & Content', icon: '✍️', description: 'Content writing, copywriting, technical writing' },
+      { value: 'Digital Marketing', label: 'Digital Marketing', icon: '📈', description: 'SEO, social media, advertising campaigns' },
+      { value: 'Data Science & AI', label: 'Data Science & AI', icon: '🤖', description: 'Machine learning, data analysis, AI development' },
+      { value: 'Virtual Assistant', label: 'Virtual Assistant', icon: '🗂️', description: 'Administrative support, project management' },
+      { value: 'Video & Animation', label: 'Video & Animation', icon: '🎬', description: 'Video editing, motion graphics, 3D animation' },
+      { value: 'Translation', label: 'Translation', icon: '🌍', description: 'Language translation and localization' },
+      { value: 'Accounting & Finance', label: 'Accounting & Finance', icon: '💰', description: 'Bookkeeping, financial analysis, consulting' },
+      { value: 'Legal Services', label: 'Legal Services', icon: '⚖️', description: 'Legal writing, contract review, compliance' },
+      { value: 'Engineering', label: 'Engineering', icon: '🔧', description: 'Software engineering, system architecture' }
+    ],
+    []
+  )
+
   // Prompt type selection
   const [promptType, setPromptType] = useState<SupportPromptType>('ENHANCE')
   const promptTypeOptions: { value: SupportPromptType; label: string; icon: string; description: string }[] = useMemo(
@@ -503,8 +522,9 @@ export default function PromptPlaygroundModern() {
       { value: 'ANALYZE', label: 'Analyze', icon: '🔍', description: 'Get comprehensive code review with security and performance insights' },
       { value: 'DEBUG', label: 'Debug', icon: '🐛', description: 'Systematic problem-solving with root cause analysis' },
       { value: 'OPTIMIZE', label: 'Optimize', icon: '⚡', description: 'Improve performance, algorithms, and resource efficiency' },
-      { value: 'DOCUMENT', label: 'Document', icon: '�', description: 'Generate complete technical documentation with examples' },
-      { value: 'TEST', label: 'Test', icon: '🧪', description: 'Create comprehensive test suites with edge case coverage' }
+      { value: 'DOCUMENT', label: 'Document', icon: '📝', description: 'Generate complete technical documentation with examples' },
+      { value: 'TEST', label: 'Test', icon: '🧪', description: 'Create comprehensive test suites with edge case coverage' },
+      { value: 'UPWORK', label: 'Upwork Proposal', icon: '💼', description: 'AI-powered proposal generator with web research for winning Upwork bids' }
     ],
     []
   )
@@ -535,6 +555,15 @@ export default function PromptPlaygroundModern() {
 
     fetchModels()
   }, [model])
+
+  // Update language when switching to/from UPWORK mode
+  useEffect(() => {
+    if (promptType === 'UPWORK' && !upworkSpecializationOptions.find(opt => opt.value === language)) {
+      setLanguage('Web Development')
+    } else if (promptType !== 'UPWORK' && !languageOptions.find(opt => opt.value === language)) {
+      setLanguage('TypeScript')
+    }
+  }, [promptType, language, languageOptions, upworkSpecializationOptions])
 
   const handleGenerate = async () => {
     if (!userText.trim()) {
@@ -592,15 +621,18 @@ export default function PromptPlaygroundModern() {
       DEBUG: 'Describe the error or issue you\'re experiencing, include error messages and relevant code',
       OPTIMIZE: 'Share code or describe the system you want to optimize for better performance',
       DOCUMENT: 'Paste code, function, or describe the project you want to document',
-      TEST: 'Paste the code or function you want to create comprehensive tests for'
+      TEST: 'Paste the code or function you want to create comprehensive tests for',
+      UPWORK: 'Paste the complete Upwork job description here, including requirements, budget, timeline, and any specific details from the client'
     }
     return placeholders[type]
   }
 
   const charCount = userText.length
-  const responseSubtitle = useMemo(() => (
-    promptType === 'DOCUMENT' ? 'Your document' : 'Your enhanced prompt'
-  ), [promptType])
+  const responseSubtitle = useMemo(() => {
+    if (promptType === 'DOCUMENT') return 'Your document'
+    if (promptType === 'UPWORK') return 'Your winning proposal'
+    return 'Your enhanced prompt'
+  }, [promptType])
   const [activeMobileTab, setActiveMobileTab] = useState<'controls' | 'response'>('controls')
 
   return (
@@ -640,7 +672,7 @@ export default function PromptPlaygroundModern() {
             </h1>
           </div>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Transform your ideas into powerful prompts using proven prompt engineering techniques. Get enhanced prompts, code analysis, debugging help, performance optimization, documentation, and comprehensive test suites.
+            Transform your ideas into powerful prompts using proven prompt engineering techniques. Get enhanced prompts, code analysis, debugging help, performance optimization, documentation, comprehensive test suites, and AI-powered Upwork proposals.
           </p>
           
           {/* Feature badges */}
@@ -656,6 +688,10 @@ export default function PromptPlaygroundModern() {
             <Badge variant="default">
               <span className="w-2 h-2 bg-purple-400 rounded-full"></span>
               Multiple Models
+            </Badge>
+            <Badge variant="default">
+              <span className="w-2 h-2 bg-orange-400 rounded-full"></span>
+              Upwork Proposals
             </Badge>
           </div>
         </motion.div>
@@ -751,11 +787,13 @@ export default function PromptPlaygroundModern() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-3">Programming language</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">
+                    {promptType === 'UPWORK' ? 'Your specialization' : 'Programming language'}
+                  </label>
                   <ModernSelect
                     value={language}
                     onChange={setLanguage}
-                    options={languageOptions}
+                    options={promptType === 'UPWORK' ? upworkSpecializationOptions : languageOptions}
                     searchable={true}
                   />
                 </div>
@@ -816,6 +854,30 @@ export default function PromptPlaygroundModern() {
                     Press Shift + Enter for new line
                   </div>
                 </motion.div>
+                
+                {/* Upwork-specific information */}
+                {promptType === 'UPWORK' && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-4 p-4 text-sm text-blue-800 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl"
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-blue-500">💼</span>
+                      <span className="font-medium">Personalized Upwork Proposal Mode</span>
+                      <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">✨ AI Enhanced</span>
+                    </div>
+                    <p className="text-sm mb-2">
+                      This mode creates personalized proposals using <strong>Sridharan&apos;s actual profile</strong> - 
+                      Full-Stack Developer at Aspire Systems with 3+ years experience, 50K+ users served, 
+                      and expertise in React, Node.js, AI, and scalable applications.
+                    </p>
+                    <div className="text-xs text-blue-600 flex items-center gap-1">
+                      <span>🔍</span>
+                      <span>Auto-researches latest proposal techniques and integrates portfolio data</span>
+                    </div>
+                  </motion.div>
+                )}
               </div>
 
               {/* Action buttons */}

@@ -597,7 +597,8 @@ export default function PromptPlayground() {
       DEBUG: 'Describe the error or issue you\'re experiencing, include error messages and relevant code',
       OPTIMIZE: 'Share code or describe the system you want to optimize for better performance',
       DOCUMENT: 'Paste code, function, or describe the project you want to document',
-      TEST: 'Paste the code or function you want to create comprehensive tests for'
+      TEST: 'Paste the code or function you want to create comprehensive tests for',
+      UPWORK: 'Paste the job description or requirements from Upwork that you want to create a tailored proposal for'
     }
     return placeholders[type]
   }

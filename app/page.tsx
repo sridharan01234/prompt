@@ -1,11 +1,11 @@
-import PromptPlayground from '@/components/PromptPlayground'
+import PromptPlaygroundModern from '@/components/PromptPlaygroundModern'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { Analytics } from '@vercel/analytics/next'
 
 export default function HomePage() {
 	return (
 		<>
-			<PromptPlayground />
+			<PromptPlaygroundModern />
 			<Analytics />
 			<SpeedInsights />
 		</>
