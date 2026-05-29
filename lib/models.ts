@@ -1,4 +1,7 @@
 export const LIMITED_MODELS = [
+  'gpt-5.4-mini',
+  'gpt-5.4-nano',
+  'gpt-5.1-codex-mini',
   'gpt-5-mini',
   'gpt-5-nano',
   'gpt-4.1-mini',
@@ -11,7 +14,12 @@ export const LIMITED_MODELS = [
 ]
 
 export const PREMIUM_MODELS = [
+  'gpt-5.4',
+  'gpt-5.2',
+  'gpt-5.1',
+  'gpt-5.1-codex',
   'gpt-5',
+  'gpt-5-codex',
   'gpt-5-chat-latest',
   'gpt-4.1',
   'gpt-4o',
