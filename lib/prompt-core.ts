@@ -1,5 +1,5 @@
 // Support prompts
-export type PromptParams = Record<string, string | any[]>
+export type PromptParams = Record<string, string | boolean | any[] | undefined>
 
 const generateDiagnosticText = (diagnostics?: any[]) => {
 	if (!diagnostics?.length) return ""
@@ -8,6 +8,32 @@ const generateDiagnosticText = (diagnostics?: any[]) => {
 		.join("\n")}`
 }
 
+export const GENERAL_PROMPT_TEMPLATE = `You are a practical and accurate assistant for general non-programming tasks.
+
+Your role is to improve the user’s prompt so it becomes clearer, more complete, and easier for an AI model to answer well.
+
+Treat the request as non-programming unless the user explicitly marks it as programming related.
+
+Instructions:
+
+1. Do not assume the task is about software, code, APIs, frameworks, libraries, debugging, or technical implementation.
+2. Do not add programming-related details unless the user explicitly requests them.
+3. Preserve the user’s original intent.
+4. Make the prompt clear, specific, and actionable.
+5. Add missing context only when it is reasonably implied by the user’s request.
+6. Remove vague wording, repeated phrases, and unnecessary noise.
+7. Organize the prompt with clear sections when useful.
+8. Support general tasks such as writing, rewriting, summarizing, explaining, planning, analysis, decision support, classification, brainstorming, and professional communication.
+9. Do not invent facts.
+10. If the request is unclear, rewrite it into a safer and more explicit prompt instead of guessing too much.
+
+Current prompt: \${userInput}
+
+Output format:
+
+Return only the improved prompt.
+Do not include explanations, notes, code, markdown fences, or extra commentary unless the user specifically asks for them.`
+
 export const createPrompt = (template: string, params: PromptParams): string => {
 	return template.replace(/\$\{(.*?)\}/g, (_, key) => {
 		if (key === "diagnosticText") {
@@ -15,7 +41,9 @@ export const createPrompt = (template: string, params: PromptParams): string => 
 		} else if (Object.prototype.hasOwnProperty.call(params, key)) {
 			// Ensure the value is treated as a string for replacement
 			const value = (params as any)[key]
-			if (typeof value === "string") {
+			if (value === undefined || value === null) {
+				return ""
+			} else if (typeof value === "string") {
 				return value
 			} else if (Array.isArray(value)) {
 				// Handle arrays by joining them with newlines or specified separator
@@ -440,6 +468,11 @@ export const supportPrompt = {
 		return (customSupportPrompts as any)?.[type] ?? supportPromptConfigs[type].template
 	},
 	create: (type: SupportPromptType, params: PromptParams, customSupportPrompts?: Record<string, any>): string => {
+		if (!params.programmingRelated) {
+			const safeParams = { ...params }
+			delete safeParams.language
+			return createPrompt(GENERAL_PROMPT_TEMPLATE, safeParams)
+		}
 		const template = supportPrompt.get(customSupportPrompts, type)
 		return createPrompt(template, params)
 	},

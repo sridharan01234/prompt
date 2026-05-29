@@ -173,7 +173,7 @@ function ModelDropdown({
 
 export default function PromptPlayground() {
   const { user, isAuthenticated, signOut } = useAuth()
-  const [userText, setUserText] = useState<string>('Write a function to sort an array efficiently')
+  const [userText, setUserText] = useState<string>('Improve this message so it sounds clear and professional')
   const [error, setError] = useState<string>('')
   const [model, setModel] = useState<string>('')
   const [models, setModels] = useState<string[]>([])
@@ -200,6 +200,9 @@ export default function PromptPlayground() {
 
   // refs for focus management
   const inputRef = useRef<HTMLTextAreaElement | null>(null)
+
+  // Programming related checkbox selection
+  const [programmingRelated, setProgrammingRelated] = useState<boolean>(false)
 
   // Programming language selection
   const [language, setLanguage] = useState<string>('TypeScript')
@@ -272,7 +275,7 @@ export default function PromptPlayground() {
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [model, userText, language])
+  }, [model, userText, language, programmingRelated])
 
   const onAskOpenAI = async () => {
     if (loading) return
@@ -285,7 +288,11 @@ export default function PromptPlayground() {
     }
     setLoading(true)
     try {
-      const params = { userInput: userText, language }
+      const params = {
+        userInput: userText,
+        programmingRelated,
+        ...(programmingRelated ? { language } : {})
+      }
       const res = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -360,7 +367,7 @@ export default function PromptPlayground() {
         </div>
 
         {/* Selections */}
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+        <div className={`grid grid-cols-1 gap-3 ${programmingRelated ? 'md:grid-cols-4' : 'md:grid-cols-3'}`}>
           <div className="panel">
             <label className="mb-1 block text-xs font-medium text-slate-700">Prompt type</label>
             <select value={promptType} onChange={(e) => setPromptType(e.target.value as SupportPromptType)} className="w-full">
@@ -372,16 +379,33 @@ export default function PromptPlayground() {
             </select>
           </div>
 
-          <div className="panel">
-            <label className="mb-1 block text-xs font-medium text-slate-700">Language</label>
-            <select value={language} onChange={(e) => setLanguage(e.target.value)} className="w-full">
-              {languageOptions.map((lang) => (
-                <option key={lang} value={lang}>
-                  {lang}
-                </option>
-              ))}
-            </select>
+          <div className="panel flex flex-col justify-center">
+            <div className="flex items-center gap-2">
+              <input
+                id="programming-related-checkbox"
+                type="checkbox"
+                checked={programmingRelated}
+                onChange={(e) => setProgrammingRelated(e.target.checked)}
+                className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+              />
+              <label htmlFor="programming-related-checkbox" className="text-xs font-medium text-slate-700 cursor-pointer select-none">
+                Programming related
+              </label>
+            </div>
           </div>
+
+          {programmingRelated && (
+            <div className="panel">
+              <label className="mb-1 block text-xs font-medium text-slate-700">Language</label>
+              <select value={language} onChange={(e) => setLanguage(e.target.value)} className="w-full">
+                {languageOptions.map((lang) => (
+                  <option key={lang} value={lang}>
+                    {lang}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <div className="panel">
             <div className="mb-1 flex items-center justify-between">
