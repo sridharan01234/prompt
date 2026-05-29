@@ -333,7 +333,7 @@ export default function PromptPlayground() {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-base font-semibold text-slate-900">Playground</h2>
-            <p className="text-xs text-slate-600">Describe your task, get refined prompt</p>
+            <p className="text-xs text-slate-600">Enter your prompt, get refined prompt</p>
           </div>
           <div className="flex items-center gap-2">
             {isAuthenticated ? (
@@ -405,19 +405,20 @@ export default function PromptPlayground() {
           </div>
         </div>
 
-        {/* Input */}
+        {/* Prompt Input */}
         <div className="panel">
           <div className="mb-1 flex items-center justify-between">
-            <label className="text-xs font-medium text-slate-700">Your input</label>
+            <label className="text-xs font-medium text-slate-700">Prompt</label>
             <span className="text-[11px] text-slate-500">{charCount} chars</span>
           </div>
           <textarea
+            id="prompt-input-textarea"
             ref={inputRef}
             rows={9}
             value={userText}
             onChange={(e) => setUserText(e.target.value)}
             className="font-mono"
-            placeholder="Describe what you need…"
+            placeholder="Enter your prompt..."
           />
           {error && <p className="mt-2 text-xs text-red-600">{error}</p>}
           {!isAuthenticated && (
